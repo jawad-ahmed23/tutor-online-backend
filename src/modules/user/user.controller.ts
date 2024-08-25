@@ -1,0 +1,39 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Response,
+  UseGuards,
+} from '@nestjs/common';
+import { Response as Res, Express } from 'express';
+import { Uid } from '../../decorator/uid.decorator';
+import { UserService } from './user.service';
+import { AddStudentsDto } from './dto/index.dto';
+
+import { RolesGuard } from '../../guard/roles.guard';
+import { Roles } from '../../decorator/role.decorator';
+import { Role } from '../../constants';
+
+@Controller('user')
+export class UserController {
+  constructor(private readonly userService: UserService) {}
+
+  @Roles(Role.PARENT)
+  @UseGuards(RolesGuard)
+  @Get('/get-students')
+  async getStudents(@Uid() uid: string, @Response() res: Res) {
+    return this.userService.getStudents(uid, res);
+  }
+
+  @Roles(Role.PARENT)
+  @UseGuards(RolesGuard)
+  @Post('/add-students')
+  async addStudents(
+    @Uid() uid: string,
+    @Body() addStudentsDto: AddStudentsDto,
+    @Response() res: Res,
+  ) {
+    return this.userService.addStudents(uid, addStudentsDto, res);
+  }
+}
