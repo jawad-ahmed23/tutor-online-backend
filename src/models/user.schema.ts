@@ -9,18 +9,9 @@ export class User {
   @Prop({ required: true })
   name: string;
 
-  @Prop({})
-  username: string;
-
   @Prop({
     enum: {
-      values: [
-        Role.ADMIN,
-        Role.CO_ORDINATOR,
-        Role.PARENT,
-        Role.STUDENT,
-        Role.TUTOR,
-      ],
+      values: [Role.ADMIN, Role.CO_ORDINATOR, Role.PARENT, Role.TUTOR],
       message: 'Invalid role type',
     },
   })
@@ -33,7 +24,8 @@ export class User {
       },
       message: (props: any) => `${props.value} is not a valid email!`,
     },
-    //  required: true,
+    required: true,
+    unique: true,
   })
   email: string;
 
@@ -45,37 +37,21 @@ export class User {
   password: string;
 
   @Prop()
-  tempPassword: string;
+  phoneNumber: number;
 
-  @Prop({ unique: true })
-  verificationCode: string;
+  @Prop({
+    type: {
+      code: Number,
+      expire: Date,
+    },
+  })
+  verification: {
+    code: number;
+    expire: Date;
+  };
 
   @Prop({ default: false })
   verified: boolean;
-
-  @Prop({})
-  dateOfBirth: string;
-
-  @Prop({})
-  country: string;
-
-  @Prop({})
-  city: string;
-
-  @Prop({})
-  groupYear: string;
-
-  @Prop({})
-  subject: string;
-
-  @Prop({})
-  daysPerWeek: number;
-
-  @Prop({})
-  freeSessionDate: [Date];
-
-  @Prop({})
-  addedBy: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

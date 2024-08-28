@@ -1,11 +1,13 @@
 import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MailerModule } from '@nestjs-modules/mailer';
+
 import { User, UserSchema } from './models/user.schema';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
+import { Students, StudentsSchema } from './models/student.schema';
 import { ConfigModule } from '@nestjs/config';
 import { AuthMiddleware } from './middlewares';
 
@@ -13,7 +15,10 @@ import { AuthMiddleware } from './middlewares';
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
     MongooseModule.forRoot(process.env.MONGO_URI),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: Students.name, schema: StudentsSchema },
+    ]),
     MailerModule.forRoot({
       transport: {
         host: process.env.EMAIL_HOST,

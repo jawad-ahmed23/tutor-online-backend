@@ -9,14 +9,18 @@ import * as jwt from 'jsonwebtoken';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import config from '../config';
-
+import { Students } from '../models/student.schema';
 import { User } from '../models/user.schema';
+
+import { Role } from '../constants';
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
   constructor(
     @InjectModel(User.name)
     private userModel: Model<User>,
+    @InjectModel(Students.name)
+    private studentModel: Model<Students>,
   ) {}
 
   async use(req: any, res: Response, next: any): Promise<any> {
@@ -32,9 +36,15 @@ export class AuthMiddleware implements NestMiddleware {
       const decoded: any = jwt.verify(token, config().JWT_SECRET);
       console.log(decoded._id, 'decoded');
 
-      const userData = await this.userModel.findOne({
+      let userData = await this.userModel.findOne({
         _id: decoded._id,
       });
+
+      if (!userData) {
+        userData = await this.studentModel.findOne({
+          _id: decoded._id,
+        });
+      }
 
       console.log('userData', userData);
 
@@ -43,7 +53,7 @@ export class AuthMiddleware implements NestMiddleware {
 
       const user = {
         uid: decoded._id,
-        roles: userData.role,
+        roles: userData.role ? userData.role : Role.STUDENT,
       };
 
       req.user = user;
