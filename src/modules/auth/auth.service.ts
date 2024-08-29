@@ -182,19 +182,20 @@ export class AuthService {
   }
 
   async _generateUniqueVerificationCode() {
-    let code;
+    // let code;
     // let isUnique = false;
 
     // while (!isUnique) {
-    //   code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    //   const existingCode = await this.userModel.findOne({
-    //     verificationCode: code,
-    //   });
-    //   if (!existingCode) {
-    //     isUnique = true;
-    //   }
+    // const existingCode = await this.userModel.findOne({
+    //   verificationCode: code,
+    // });
+    // if (!existingCode) {
+    //   isUnique = true;
     // }
+    // }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
 
     return code;
   }
