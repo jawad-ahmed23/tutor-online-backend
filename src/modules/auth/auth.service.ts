@@ -113,7 +113,10 @@ export class AuthService {
         .set({
           'x-a': authToken,
         })
-        .json({ _id: user._id, success: true });
+        .json({
+          success: true,
+          user: { _id: user._id, verified: user.verified },
+        });
     } catch (err) {
       console.log(err.message);
       throw new BadRequestException({ message: err.message, success: false });
@@ -123,6 +126,7 @@ export class AuthService {
   async sendVerificationCode(uid: string, res: Res): Promise<Res> {
     try {
       const user = await this.userModel.findOne({ _id: uid });
+
       const code = await this._generateUniqueVerificationCode();
 
       const message = `your verification code ${code}`;
@@ -171,8 +175,8 @@ export class AuthService {
     }
   }
 
-  _sendMail(from, to, subject, message) {
-    this.mailService.sendMail({
+  async _sendMail(from: string, to: string, subject: string, message: string) {
+    await this.mailService.sendMail({
       from,
       to,
       subject,
