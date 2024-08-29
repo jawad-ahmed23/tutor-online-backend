@@ -43,11 +43,23 @@ export class UserService {
     try {
       const { students } = body;
 
+      const _students = [];
+
       for (const student of students) {
         const username = await this._generateUniqueUsername(student.name);
         const randomId = new ShortUniqueId({ length: 12 });
         const password = randomId.rnd();
         const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+        _students.push({
+          ...student,
+          username,
+          password: hashedPassword,
+          tempPassword: password,
+          addedBy: uid,
+          //  role: Role.STUDENT,
+        });
+
         await this.studentsModel.create({
           ...student,
           username,
@@ -60,6 +72,7 @@ export class UserService {
 
       return res.json({
         message: 'students added successfully!',
+        students: _students,
         success: true,
       });
     } catch (err) {

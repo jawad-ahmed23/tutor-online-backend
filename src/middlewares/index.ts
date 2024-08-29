@@ -61,7 +61,7 @@ export class AuthMiddleware implements NestMiddleware {
     } catch (error) {
       console.log('error', error.message);
       throw new UnauthorizedException({
-        message: error.response.message || 'User is not authorized!',
+        message: error.message || 'User is not authorized!',
         errorCode: 'USER_NOT_AUTHORIZED',
       });
     }
