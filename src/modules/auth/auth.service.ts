@@ -57,25 +57,22 @@ export class AuthService {
 
       const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
+      const date = new Date();
+      const expireDate = addHours(date, 1);
+      const code = await this._generateUniqueVerificationCode();
+
       const resp = await this.userModel.create({
         name,
         role,
         email,
         password: hashedPassword,
         phoneNumber,
+        verification: { code: code, expire: expireDate },
       });
 
-      const code = await this._generateUniqueVerificationCode();
       const message = `your verification code ${code}`;
-      const date = new Date();
-      const expireDate = addHours(date, 1);
 
       this._sendMail(FROM_VERIFY_EMAIL, resp.email, 'Verify Email', message);
-
-      await this.userModel.findOneAndUpdate(
-        { _id: resp._id },
-        { verification: { code: code, expire: expireDate } },
-      );
 
       const authToken = this.jwtService.sign({ _id: resp._id });
       return res
@@ -154,7 +151,7 @@ export class AuthService {
       const user = await this.userModel.findOne({ _id: uid });
 
       //@ts-ignore
-      if (code !== user.verification.code) {
+      if (+code !== user.verification.code) {
         throw new ConflictException('Code is incorrect!');
       }
       const currentDate = new Date();
@@ -186,18 +183,18 @@ export class AuthService {
 
   async _generateUniqueVerificationCode() {
     let code;
-    let isUnique = false;
+    // let isUnique = false;
 
-    while (!isUnique) {
-      code = Math.floor(100000 + Math.random() * 900000).toString();
+    // while (!isUnique) {
+    //   code = Math.floor(100000 + Math.random() * 900000).toString();
 
-      const existingCode = await this.userModel.findOne({
-        verificationCode: code,
-      });
-      if (!existingCode) {
-        isUnique = true;
-      }
-    }
+    //   const existingCode = await this.userModel.findOne({
+    //     verificationCode: code,
+    //   });
+    //   if (!existingCode) {
+    //     isUnique = true;
+    //   }
+    // }
 
     return code;
   }

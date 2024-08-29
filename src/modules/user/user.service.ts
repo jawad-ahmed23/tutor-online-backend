@@ -88,7 +88,7 @@ export class UserService {
     while (!isUnique) {
       const code = Math.floor(1000 + Math.random() * 900000).toString();
       username = `${name}_${code}`;
-      const existingCode = await this.userModel.findOne({
+      const existingCode = await this.studentsModel.findOne({
         username: username,
       });
       if (!existingCode) {
