@@ -34,7 +34,7 @@ export class Students {
   groupYear: string;
 
   @Prop()
-  subject: string;
+  subjects: string[];
 
   @Prop()
   daysPerWeek: number;

@@ -11,7 +11,7 @@ export class User {
 
   @Prop({
     enum: {
-      values: [Role.ADMIN, Role.CO_ORDINATOR, Role.PARENT, Role.TUTOR],
+      values: [Role.ADMIN, Role.COORDINATOR, Role.PARENT, Role.TUTOR],
       message: 'Invalid role type',
     },
   })

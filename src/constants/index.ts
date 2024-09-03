@@ -3,7 +3,7 @@ export const FROM_VERIFY_EMAIL = 'noreply@gmail.com';
 
 export enum Role {
   ADMIN = 'admin',
-  CO_ORDINATOR = 'co-ordinator',
+  COORDINATOR = 'coordinator',
   PARENT = 'parent',
   TUTOR = 'tutor',
   STUDENT = 'student',
