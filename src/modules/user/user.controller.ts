@@ -9,7 +9,7 @@ import {
 import { Response as Res, Express } from 'express';
 import { Uid } from '../../decorator/uid.decorator';
 import { UserService } from './user.service';
-import { AddStudentsDto } from './dto/index.dto';
+import { AddStudentsDto, AddComplaintDto } from './dto/index.dto';
 
 import { RolesGuard } from '../../guard/roles.guard';
 import { Roles } from '../../decorator/role.decorator';
@@ -35,5 +35,23 @@ export class UserController {
     @Response() res: Res,
   ) {
     return this.userService.addStudents(uid, addStudentsDto, res);
+  }
+
+  @Roles(Role.PARENT)
+  @UseGuards(RolesGuard)
+  @Get('/get-complaints')
+  async getComplaints(@Uid() uid: string, @Response() res: Res) {
+    return this.userService.getComplaints(uid, res);
+  }
+
+  @Roles(Role.PARENT)
+  @UseGuards(RolesGuard)
+  @Post('/add-complaint')
+  async addComplaints(
+    @Uid() uid: string,
+    @Body() addComplaintDto: AddComplaintDto,
+    @Response() res: Res,
+  ) {
+    return this.userService.addComplaint(uid, addComplaintDto, res);
   }
 }

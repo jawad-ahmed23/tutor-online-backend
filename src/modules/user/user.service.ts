@@ -9,10 +9,11 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import ShortUniqueId from 'short-unique-id';
 import * as bcrypt from 'bcrypt';
-import { AddStudentsDto } from './dto/index.dto';
+import { AddComplaintDto, AddStudentsDto } from './dto/index.dto';
 import { User } from '../../models/user.schema';
 import { SALT_ROUNDS, Role } from '../../constants';
 import { Students } from '../../models/student.schema';
+import { Complaints } from '../../models/complaints.schema';
 //import { UserRole, UserStatus } from '../../constants';
 
 @Injectable()
@@ -22,6 +23,8 @@ export class UserService {
     private userModel: Model<User>,
     @InjectModel(Students.name)
     private studentsModel: Model<Students>,
+    @InjectModel(Complaints.name)
+    private complaintsModel: Model<Complaints>,
   ) {}
 
   async getStudents(uid: string, res: Res) {
@@ -81,6 +84,42 @@ export class UserService {
     }
   }
 
+  async addComplaint(uid: string, body: AddComplaintDto, res: Res) {
+    try {
+      const { title, message } = body;
+      const complaintId = await this._generateUniqueComplaintId('cm');
+
+      await this.complaintsModel.create({
+        id: complaintId,
+        title,
+        message,
+        complaintBy: uid,
+      });
+
+      return res.json({
+        message: 'complaint created successfully!',
+        success: true,
+      });
+    } catch (err) {
+      console.log(err);
+      throw new BadRequestException({ message: err.message, success: false });
+    }
+  }
+
+  async getComplaints(uid: string, res: Res) {
+    try {
+      const complaints = await this.complaintsModel.find({ complaintBy: uid });
+      return res.json({
+        message: 'complaint created successfully!',
+        complaints: complaints,
+        success: true,
+      });
+    } catch (err) {
+      console.log(err);
+      throw new BadRequestException({ message: err.message, success: false });
+    }
+  }
+
   async _generateUniqueUsername(name) {
     let username;
     let isUnique = false;
@@ -97,5 +136,23 @@ export class UserService {
     }
 
     return username;
+  }
+
+  async _generateUniqueComplaintId(name) {
+    let complaintId;
+    let isUnique = false;
+
+    while (!isUnique) {
+      const code = Math.floor(1000 + Math.random() * 900000).toString();
+      complaintId = `${name}_${code}`;
+      const existingCode = await this.complaintsModel.findOne({
+        id: complaintId,
+      });
+      if (!existingCode) {
+        isUnique = true;
+      }
+    }
+
+    return complaintId;
   }
 }

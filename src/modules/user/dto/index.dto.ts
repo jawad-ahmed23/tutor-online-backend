@@ -30,3 +30,11 @@ export class AddStudentsDto {
   @ApiProperty()
   students: [StudentDto];
 }
+
+export class AddComplaintDto {
+  @ApiProperty()
+  title: string;
+
+  @ApiProperty()
+  message: string;
+}
