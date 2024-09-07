@@ -5,7 +5,7 @@ export class RegisterDto {
   name: string;
 
   @ApiProperty()
-  role: string;
+  role: 'parent' | 'student';
 
   @ApiProperty()
   email: string;
@@ -22,8 +22,12 @@ export class LoginDto {
 
   @ApiProperty()
   username?: string;
+
   @ApiProperty()
   password: string;
+
+  @ApiProperty()
+  role: string;
 }
 
 export class VerifyEmailDto {

@@ -17,7 +17,7 @@ export class StudentDto {
   groupYear: string;
 
   @ApiProperty()
-  subject: string;
+  subjects: string[];
 
   @ApiProperty()
   daysPerWeek: number;

@@ -1,6 +1,7 @@
 import {
   Injectable,
   BadRequestException,
+  NotFoundException,
   // InternalServerErrorException,
   // HttpException,
 } from '@nestjs/common';
@@ -9,9 +10,9 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import ShortUniqueId from 'short-unique-id';
 import * as bcrypt from 'bcrypt';
-import { AddComplaintDto, AddStudentsDto } from './dto/index.dto';
+import { AddComplaintDto, AddStudentsDto, StudentDto } from './dto/index.dto';
 import { User } from '../../models/user.schema';
-import { SALT_ROUNDS, Role } from '../../constants';
+import { SALT_ROUNDS } from '../../constants';
 import { Students } from '../../models/student.schema';
 import { Complaints } from '../../models/complaints.schema';
 //import { UserRole, UserStatus } from '../../constants';
@@ -69,6 +70,7 @@ export class UserService {
           password: hashedPassword,
           tempPassword: password,
           addedBy: uid,
+          isVerified: true,
           //  role: Role.STUDENT,
         });
       }
@@ -113,6 +115,32 @@ export class UserService {
         message: 'complaint created successfully!',
         complaints: complaints,
         success: true,
+      });
+    } catch (err) {
+      console.log(err);
+      throw new BadRequestException({ message: err.message, success: false });
+    }
+  }
+  async onBoardSingleStudent(uid: string, body: StudentDto, res: Res) {
+    try {
+      const isStudentExists = await this.studentsModel.findById(uid);
+
+      if (!isStudentExists) {
+        throw new NotFoundException('Student not found!');
+      }
+
+      await this.studentsModel.findByIdAndUpdate(uid, {
+        dateOfBirth: body.dateOfBirth,
+        country: body.country,
+        city: body.city,
+        subjects: body.subjects,
+        daysPerWeek: body.daysPerWeek,
+        freeSessionDate: body.freeSessionDate,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'Updated Successfully!',
       });
     } catch (err) {
       console.log(err);
