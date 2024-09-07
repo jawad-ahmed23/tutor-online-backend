@@ -6,7 +6,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { Document, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Response as Res } from 'express';
 import { JwtService } from '@nestjs/jwt';
@@ -31,13 +31,27 @@ export class AuthService {
 
   async getMe(uid: string, res: Res): Promise<Res> {
     try {
-      const user = await this.userModel.findOne({ _id: uid });
+      let user: any;
+
+      const _user = await this.userModel.findOne({ _id: uid });
+
+      if (_user) {
+        // @ts-ignore
+        user = _user._doc;
+      }
+
+      if (!user) {
+        user = await this.studentsModel.findOne({ _id: uid });
+
+        // assigning role as student if it's a student
+        user = { ...user._doc, role: 'student' };
+      }
 
       if (!user) {
         throw new BadRequestException("User doesn't exist!");
       }
 
-      return res.json({ user, success: true });
+      return res.json({ user: user, success: true });
     } catch (err) {
       console.log(err);
       throw new BadRequestException({ message: err.message, success: false });
@@ -56,19 +70,29 @@ export class AuthService {
       }
 
       const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-
       const date = new Date();
       const expireDate = addHours(date, 1);
       const code = await this._generateUniqueVerificationCode();
 
-      const resp = await this.userModel.create({
+      const userToAdd = {
         name,
-        role,
         email,
         password: hashedPassword,
         phoneNumber,
+        role,
         verification: { code: code, expire: expireDate },
-      });
+      };
+
+      let resp = null;
+
+      if (role === 'student') {
+        const username = await this._generateUniqueUsername(name);
+        resp = await this.studentsModel.create({ ...userToAdd, username });
+      } else {
+        resp = await this.userModel.create({ ...userToAdd, role });
+      }
+
+      // const resp = await this.userModel.create({ ...userToAdd });
 
       const message = `your verification code ${code}`;
 
@@ -86,14 +110,22 @@ export class AuthService {
 
   async login(body: LoginDto, res: Res): Promise<Res> {
     try {
-      const { username, email, password } = body;
-      // const data = username ? { email } : { username };
+      const { username, email, password, role } = body;
 
       let user;
-      if (username) {
+
+      if (role === 'student' && username) {
         user = await this.studentsModel.findOne({ username: username });
       }
-      user = await this.userModel.findOne({ email });
+
+      if (role === 'student' && email) {
+        user = await this.studentsModel.findOne({ email: email });
+      }
+
+      if (role === 'parent') {
+        user = await this.userModel.findOne({ email });
+      }
+
       if (!user) {
         throw new NotFoundException('User not found!');
       }
@@ -148,7 +180,16 @@ export class AuthService {
   async verifyEmail(uid: string, body: VerifyEmailDto, res: Res): Promise<Res> {
     try {
       const { code } = body;
-      const user = await this.userModel.findOne({ _id: uid });
+
+      let isStudent = false;
+      let user;
+
+      user = await this.userModel.findOne({ _id: uid });
+
+      if (!user) {
+        user = await this.studentsModel.findOne({ _id: uid });
+        isStudent = true;
+      }
 
       //@ts-ignore
       if (+code !== user.verification.code) {
@@ -160,7 +201,14 @@ export class AuthService {
         throw new ConflictException('Code is expired!');
       }
 
-      await this.userModel.findOneAndUpdate({ _id: uid }, { verified: true });
+      if (isStudent) {
+        await this.studentsModel.findOneAndUpdate(
+          { _id: uid },
+          { verified: true },
+        );
+      } else {
+        await this.userModel.findOneAndUpdate({ _id: uid }, { verified: true });
+      }
 
       return res.json({
         message: 'user verified successfully!',
@@ -198,5 +246,23 @@ export class AuthService {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
     return code;
+  }
+
+  async _generateUniqueUsername(name: string) {
+    let username: string;
+    let isUnique = false;
+
+    while (!isUnique) {
+      const code = Math.floor(1000 + Math.random() * 900000).toString();
+      username = `${name.toLowerCase().replace(' ', '_')}_${code}`;
+      const existingCode = await this.studentsModel.findOne({
+        username: username,
+      });
+      if (!existingCode) {
+        isUnique = true;
+      }
+    }
+
+    return username;
   }
 }

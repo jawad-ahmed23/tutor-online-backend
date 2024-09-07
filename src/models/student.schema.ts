@@ -12,6 +12,9 @@ export class Students {
   @Prop({ required: true, unique: true })
   username: string;
 
+  @Prop()
+  email: string;
+
   @Prop({
     required: true,
   })
@@ -44,6 +47,20 @@ export class Students {
 
   @Prop()
   addedBy: string;
+
+  @Prop({
+    type: {
+      code: Number,
+      expire: Date,
+    },
+  })
+  verification: {
+    code: number;
+    expire: Date;
+  };
+
+  @Prop({ default: false })
+  verified: boolean;
 }
 
 export const StudentsSchema = SchemaFactory.createForClass(Students);

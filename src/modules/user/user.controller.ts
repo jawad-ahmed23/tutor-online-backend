@@ -6,10 +6,10 @@ import {
   Response,
   UseGuards,
 } from '@nestjs/common';
-import { Response as Res, Express } from 'express';
+import { Response as Res } from 'express';
 import { Uid } from '../../decorator/uid.decorator';
 import { UserService } from './user.service';
-import { AddStudentsDto, AddComplaintDto } from './dto/index.dto';
+import { AddStudentsDto, AddComplaintDto, StudentDto } from './dto/index.dto';
 
 import { RolesGuard } from '../../guard/roles.guard';
 import { Roles } from '../../decorator/role.decorator';
@@ -53,5 +53,15 @@ export class UserController {
     @Response() res: Res,
   ) {
     return this.userService.addComplaint(uid, addComplaintDto, res);
+  }
+  @Roles(Role.STUDENT)
+  @UseGuards(RolesGuard)
+  @Post('/on-board-single-student')
+  async onBoardSingleStudent(
+    @Uid() uid: string,
+    @Body() studentDto: StudentDto,
+    @Response() res: Res,
+  ) {
+    return this.userService.onBoardSingleStudent(uid, studentDto, res);
   }
 }
