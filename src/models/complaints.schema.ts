@@ -12,11 +12,11 @@ export class Complaints {
   @Prop({
     enum: {
       values: [Status.PENDING, Status.RESOLVED],
-      message: 'Invalid role type',
+      message: 'Invalid status type',
       default: 'pending',
     },
   })
-  role: string;
+  status: string;
 
   @Prop({
     required: true,
