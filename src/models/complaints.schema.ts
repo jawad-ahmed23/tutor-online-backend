@@ -7,7 +7,7 @@ export type ComplaintsDocument = HydratedDocument<Complaints>;
 @Schema({ timestamps: true })
 export class Complaints {
   @Prop({ required: true, unique: true })
-  id: string;
+  complaintId: string;
 
   @Prop({
     enum: {

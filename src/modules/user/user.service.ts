@@ -89,13 +89,14 @@ export class UserService {
   async addComplaint(uid: string, body: AddComplaintDto, res: Res) {
     try {
       const { title, message } = body;
-      const complaintId = await this._generateUniqueComplaintId('cm');
+      const complaintId = await this._generateUniqueComplaintId('CM');
 
       await this.complaintsModel.create({
-        id: complaintId,
+        complaintId: complaintId,
         title,
         message,
         complaintBy: uid,
+        status: 'pending',
       });
 
       return res.json({
@@ -111,6 +112,7 @@ export class UserService {
   async getComplaints(uid: string, res: Res) {
     try {
       const complaints = await this.complaintsModel.find({ complaintBy: uid });
+
       return res.json({
         message: 'complaint created successfully!',
         complaints: complaints,
@@ -121,6 +123,7 @@ export class UserService {
       throw new BadRequestException({ message: err.message, success: false });
     }
   }
+
   async onBoardSingleStudent(uid: string, body: StudentDto, res: Res) {
     try {
       const isStudentExists = await this.studentsModel.findById(uid);
