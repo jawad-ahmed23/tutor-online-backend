@@ -26,9 +26,26 @@ export class StudentDto {
   freeSessionDate: [string];
 }
 
+class paymentDetailsDto {
+  @ApiProperty()
+  cardNumber: string;
+
+  @ApiProperty()
+  expirationDate: string;
+
+  @ApiProperty()
+  cvv: string;
+
+  @ApiProperty()
+  cardholderName: string;
+}
+
 export class AddStudentsDto {
   @ApiProperty()
   students: [StudentDto];
+
+  @ApiProperty()
+  paymentDetails: paymentDetailsDto;
 }
 
 export class AddComplaintDto {

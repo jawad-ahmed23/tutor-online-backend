@@ -45,7 +45,7 @@ export class UserService {
 
   async addStudents(uid: string, body: AddStudentsDto, res: Res) {
     try {
-      const { students } = body;
+      const { students, paymentDetails } = body;
 
       const _students = [];
 
@@ -75,6 +75,10 @@ export class UserService {
         });
       }
 
+      if (paymentDetails) {
+        // handle New Payment Method and subscription
+      }
+
       return res.json({
         message: 'students added successfully!',
         students: _students,
@@ -89,13 +93,14 @@ export class UserService {
   async addComplaint(uid: string, body: AddComplaintDto, res: Res) {
     try {
       const { title, message } = body;
-      const complaintId = await this._generateUniqueComplaintId('cm');
+      const complaintId = await this._generateUniqueComplaintId('CM');
 
       await this.complaintsModel.create({
-        id: complaintId,
+        complaintId: complaintId,
         title,
         message,
         complaintBy: uid,
+        status: 'pending',
       });
 
       return res.json({
@@ -111,6 +116,7 @@ export class UserService {
   async getComplaints(uid: string, res: Res) {
     try {
       const complaints = await this.complaintsModel.find({ complaintBy: uid });
+
       return res.json({
         message: 'complaint created successfully!',
         complaints: complaints,
@@ -121,6 +127,7 @@ export class UserService {
       throw new BadRequestException({ message: err.message, success: false });
     }
   }
+
   async onBoardSingleStudent(uid: string, body: StudentDto, res: Res) {
     try {
       const isStudentExists = await this.studentsModel.findById(uid);
@@ -148,8 +155,8 @@ export class UserService {
     }
   }
 
-  async _generateUniqueUsername(name) {
-    let username;
+  async _generateUniqueUsername(name: string) {
+    let username: string;
     let isUnique = false;
 
     while (!isUnique) {
@@ -166,16 +173,18 @@ export class UserService {
     return username;
   }
 
-  async _generateUniqueComplaintId(name) {
-    let complaintId;
+  async _generateUniqueComplaintId(name: string) {
+    let complaintId: string;
     let isUnique = false;
 
     while (!isUnique) {
       const code = Math.floor(1000 + Math.random() * 900000).toString();
       complaintId = `${name}_${code}`;
+
       const existingCode = await this.complaintsModel.findOne({
-        id: complaintId,
+        complaintId: complaintId,
       });
+
       if (!existingCode) {
         isUnique = true;
       }
