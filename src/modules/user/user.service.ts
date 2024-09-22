@@ -15,6 +15,7 @@ import { User } from '../../models/user.schema';
 import { SALT_ROUNDS } from '../../constants';
 import { Students } from '../../models/student.schema';
 import { Complaints } from '../../models/complaints.schema';
+import { PaymentService } from '../payment/payment.service';
 //import { UserRole, UserStatus } from '../../constants';
 
 @Injectable()
@@ -26,6 +27,7 @@ export class UserService {
     private studentsModel: Model<Students>,
     @InjectModel(Complaints.name)
     private complaintsModel: Model<Complaints>,
+    private readonly paymentService: PaymentService,
   ) {}
 
   async getStudents(uid: string, res: Res) {
@@ -45,9 +47,11 @@ export class UserService {
 
   async addStudents(uid: string, body: AddStudentsDto, res: Res) {
     try {
-      const { students } = body;
+      const { students, proceedToPayment, priceId } = body;
 
       const _students = [];
+
+      const user = await this.userModel.findById(uid);
 
       for (const student of students) {
         const username = await this._generateUniqueUsername(student.name);
@@ -61,7 +65,6 @@ export class UserService {
           password: hashedPassword,
           tempPassword: password,
           addedBy: uid,
-          //  role: Role.STUDENT,
         });
 
         await this.studentsModel.create({
@@ -70,15 +73,25 @@ export class UserService {
           password: hashedPassword,
           tempPassword: password,
           addedBy: uid,
-          isVerified: true,
-          //  role: Role.STUDENT,
+          verified: true,
         });
       }
 
+      let client_secret = null;
+
+      if (proceedToPayment) {
+        const res = await this.paymentService.createSetupIntent(
+          user.customerId,
+        );
+
+        client_secret = res.client_secret;
+      }
+
       return res.json({
+        success: true,
         message: 'students added successfully!',
         students: _students,
-        success: true,
+        client_secret: client_secret,
       });
     } catch (err) {
       console.log(err);
@@ -151,8 +164,8 @@ export class UserService {
     }
   }
 
-  async _generateUniqueUsername(name) {
-    let username;
+  async _generateUniqueUsername(name: string) {
+    let username: string;
     let isUnique = false;
 
     while (!isUnique) {
@@ -169,16 +182,18 @@ export class UserService {
     return username;
   }
 
-  async _generateUniqueComplaintId(name) {
-    let complaintId;
+  async _generateUniqueComplaintId(name: string) {
+    let complaintId: string;
     let isUnique = false;
 
     while (!isUnique) {
       const code = Math.floor(1000 + Math.random() * 900000).toString();
       complaintId = `${name}_${code}`;
+
       const existingCode = await this.complaintsModel.findOne({
-        id: complaintId,
+        complaintId: complaintId,
       });
+
       if (!existingCode) {
         isUnique = true;
       }

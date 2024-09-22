@@ -5,6 +5,9 @@ import { Students, StudentsSchema } from '../../models/student.schema';
 import { Complaints, ComplaintsSchema } from '../../models/complaints.schema';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
+import { PaymentService } from '../payment/payment.service';
+import { Price, PriceSchema } from '../../models/price.schema';
+import { Product, ProductSchema } from '../../models/product.schema';
 
 @Module({
   imports: [
@@ -12,9 +15,11 @@ import { UserService } from './user.service';
       { name: User.name, schema: UserSchema },
       { name: Students.name, schema: StudentsSchema },
       { name: Complaints.name, schema: ComplaintsSchema },
+      { name: Price.name, schema: PriceSchema },
+      { name: Product.name, schema: ProductSchema },
     ]),
   ],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, PaymentService],
 })
 export class UserModule {}
