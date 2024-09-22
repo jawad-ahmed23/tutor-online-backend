@@ -10,6 +10,7 @@ import { UserModule } from './modules/user/user.module';
 import { Students, StudentsSchema } from './models/student.schema';
 import { ConfigModule } from '@nestjs/config';
 import { AuthMiddleware } from './middlewares';
+import { ChatsModule } from './modules/chats/chats.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AuthMiddleware } from './middlewares';
     }),
     AuthModule,
     UserModule,
+    ChatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

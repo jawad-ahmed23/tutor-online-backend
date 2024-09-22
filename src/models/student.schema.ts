@@ -61,6 +61,9 @@ export class Students {
 
   @Prop({ default: false })
   verified: boolean;
+
+  @Prop()
+  groupId: string;
 }
 
 export const StudentsSchema = SchemaFactory.createForClass(Students);

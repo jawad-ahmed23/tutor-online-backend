@@ -15,6 +15,7 @@ import { User } from '../../models/user.schema';
 import { SALT_ROUNDS } from '../../constants';
 import { Students } from '../../models/student.schema';
 import { Complaints } from '../../models/complaints.schema';
+import { Group } from '../../models/group.schema';
 //import { UserRole, UserStatus } from '../../constants';
 
 @Injectable()
@@ -26,6 +27,8 @@ export class UserService {
     private studentsModel: Model<Students>,
     @InjectModel(Complaints.name)
     private complaintsModel: Model<Complaints>,
+    @InjectModel(Group.name)
+    private groupModel: Model<Group>,
   ) {}
 
   async getStudents(uid: string, res: Res) {
@@ -64,7 +67,7 @@ export class UserService {
           //  role: Role.STUDENT,
         });
 
-        await this.studentsModel.create({
+        const _student = await this.studentsModel.create({
           ...student,
           username,
           password: hashedPassword,
@@ -73,6 +76,19 @@ export class UserService {
           isVerified: true,
           //  role: Role.STUDENT,
         });
+
+        const _members = [_student._id, uid];
+
+        const group = await this.groupModel.create({ members: _members });
+
+        await this.studentsModel.findOneAndUpdate(
+          { _id: _student._id },
+          { groupId: group._id },
+        );
+        await this.userModel.findOneAndUpdate(
+          { _id: uid },
+          { groupId: group._id },
+        );
       }
 
       return res.json({

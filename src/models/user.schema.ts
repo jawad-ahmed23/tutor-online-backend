@@ -52,6 +52,9 @@ export class User {
 
   @Prop({ default: false })
   verified: boolean;
+
+  @Prop()
+  groupId: string;
 }
 
 // @Schema({ timestamps: true })
