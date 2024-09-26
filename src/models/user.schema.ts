@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { Role, EMAIL_REGEX } from '../constants';
 
 export type UserDocument = HydratedDocument<User>;
@@ -53,8 +53,8 @@ export class User {
   @Prop({ default: false })
   verified: boolean;
 
-  @Prop()
-  groupId: string;
+  @Prop({ type: [Types.ObjectId], default: [] })
+  groupId: Types.ObjectId[];
 }
 
 // @Schema({ timestamps: true })

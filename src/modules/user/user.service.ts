@@ -79,15 +79,24 @@ export class UserService {
 
         const _members = [_student._id, uid];
 
-        const group = await this.groupModel.create({ members: _members });
+        await Promise.all(
+          student.subjects.map(async (subject) => {
+            const group = await this.groupModel.create({
+              members: _members,
+              subject,
+            });
 
-        await this.studentsModel.findOneAndUpdate(
-          { _id: _student._id },
-          { groupId: group._id },
-        );
-        await this.userModel.findOneAndUpdate(
-          { _id: uid },
-          { groupId: group._id },
+            await this.studentsModel.findOneAndUpdate(
+              { _id: _student._id },
+              { $addToSet: { groupId: group._id } },
+            );
+
+            await this.userModel.findOneAndUpdate(
+              { _id: uid },
+
+              { $addToSet: { groupId: group._id } },
+            );
+          }),
         );
       }
 
@@ -148,7 +157,7 @@ export class UserService {
         throw new NotFoundException('Student not found!');
       }
 
-      await this.studentsModel.findByIdAndUpdate(uid, {
+      const _student = await this.studentsModel.findByIdAndUpdate(uid, {
         dateOfBirth: body.dateOfBirth,
         country: body.country,
         city: body.city,
@@ -156,6 +165,20 @@ export class UserService {
         daysPerWeek: body.daysPerWeek,
         freeSessionDate: body.freeSessionDate,
       });
+
+      await Promise.all(
+        body.subjects.map(async (subject) => {
+          const group = await this.groupModel.create({
+            members: [_student._id],
+            subject: subject,
+          });
+
+          await this.studentsModel.findOneAndUpdate(
+            { _id: _student._id },
+            { $addToSet: { groupId: group._id } },
+          );
+        }),
+      );
 
       res.status(200).json({
         success: true,

@@ -6,6 +6,9 @@ export class Group extends Document {
   @Prop({ type: [Types.ObjectId], ref: 'User', required: true })
   members: Types.ObjectId[];
 
+  @Prop({ required: true })
+  subject: string;
+
   @Prop({ default: Date.now })
   createdAt: Date;
 
