@@ -15,6 +15,9 @@ export class Students {
   @Prop()
   email: string;
 
+  @Prop({ type: String })
+  customerId: string;
+
   @Prop({
     required: true,
   })

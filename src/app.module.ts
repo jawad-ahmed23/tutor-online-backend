@@ -11,6 +11,8 @@ import { Students, StudentsSchema } from './models/student.schema';
 import { ConfigModule } from '@nestjs/config';
 import { AuthMiddleware } from './middlewares';
 import { ChatsModule } from './modules/chats/chats.module';
+import { PaymentModule } from './modules/payment/payment.module';
+import { AdminPaymentModule } from './modules/admin/payment/payment.module';
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { ChatsModule } from './modules/chats/chats.module';
     AuthModule,
     UserModule,
     ChatsModule,
+    PaymentModule,
+    AdminPaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -43,6 +47,11 @@ export class AppModule {
       .exclude(
         { path: '/auth/login', method: RequestMethod.POST },
         { path: '/auth/register', method: RequestMethod.POST },
+        { path: '/payment/prices', method: RequestMethod.ALL },
+        { path: '/payment/products', method: RequestMethod.ALL },
+        { path: '/admin/payment/products', method: RequestMethod.ALL },
+        { path: '/admin/payment/prices', method: RequestMethod.ALL },
+        { path: '/admin/prices', method: RequestMethod.ALL },
       )
       .forRoutes({ path: '/*', method: RequestMethod.ALL });
   }

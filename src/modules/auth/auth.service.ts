@@ -17,9 +17,13 @@ import { Students } from '../../models/student.schema';
 import { SALT_ROUNDS, FROM_VERIFY_EMAIL } from '../../constants';
 import { RegisterDto, LoginDto, VerifyEmailDto } from './dto/index.dto';
 import { addHours } from '../../utils';
+import Stripe from 'stripe';
+import configs from '../../config';
 
 @Injectable()
 export class AuthService {
+  private stripe: Stripe;
+
   constructor(
     @InjectModel(User.name)
     private userModel: Model<User>,
@@ -27,7 +31,11 @@ export class AuthService {
     private studentsModel: Model<Students>,
     private readonly jwtService: JwtService,
     private readonly mailService: MailerService,
-  ) {}
+  ) {
+    this.stripe = new Stripe(configs().STRIPE.SECRET_KEY, {
+      apiVersion: '2024-06-20',
+    });
+  }
 
   async getMe(uid: string, res: Res): Promise<Res> {
     try {
@@ -74,6 +82,11 @@ export class AuthService {
       const expireDate = addHours(date, 1);
       const code = await this._generateUniqueVerificationCode();
 
+      const customer = await this.stripe.customers.create({
+        name: name,
+        email: email,
+      });
+
       const userToAdd = {
         name,
         email,
@@ -81,6 +94,7 @@ export class AuthService {
         phoneNumber,
         role,
         verification: { code: code, expire: expireDate },
+        customerId: customer.id,
       };
 
       let resp = null;

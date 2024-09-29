@@ -29,6 +29,9 @@ export class User {
   })
   email: string;
 
+  @Prop({ type: String })
+  customerId: string;
+
   @Prop({
     unique: true,
     required: true,
