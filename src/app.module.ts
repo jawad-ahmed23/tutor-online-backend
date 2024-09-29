@@ -10,6 +10,7 @@ import { UserModule } from './modules/user/user.module';
 import { Students, StudentsSchema } from './models/student.schema';
 import { ConfigModule } from '@nestjs/config';
 import { AuthMiddleware } from './middlewares';
+import { ChatsModule } from './modules/chats/chats.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { AdminPaymentModule } from './modules/admin/payment/payment.module';
 
@@ -32,6 +33,7 @@ import { AdminPaymentModule } from './modules/admin/payment/payment.module';
     }),
     AuthModule,
     UserModule,
+    ChatsModule,
     PaymentModule,
     AdminPaymentModule,
   ],

@@ -15,6 +15,7 @@ import { User } from '../../models/user.schema';
 import { SALT_ROUNDS } from '../../constants';
 import { Students } from '../../models/student.schema';
 import { Complaints } from '../../models/complaints.schema';
+import { Group } from '../../models/group.schema';
 import { PaymentService } from '../payment/payment.service';
 //import { UserRole, UserStatus } from '../../constants';
 
@@ -27,6 +28,8 @@ export class UserService {
     private studentsModel: Model<Students>,
     @InjectModel(Complaints.name)
     private complaintsModel: Model<Complaints>,
+    @InjectModel(Group.name)
+    private groupModel: Model<Group>,
     private readonly paymentService: PaymentService,
   ) {}
 
@@ -67,7 +70,7 @@ export class UserService {
           addedBy: uid,
         });
 
-        await this.studentsModel.create({
+        const _student = await this.studentsModel.create({
           ...student,
           username,
           password: hashedPassword,
@@ -75,6 +78,28 @@ export class UserService {
           addedBy: uid,
           verified: true,
         });
+
+        const _members = [_student._id, uid];
+
+        await Promise.all(
+          student.subjects.map(async (subject) => {
+            const group = await this.groupModel.create({
+              members: _members,
+              subject,
+            });
+
+            await this.studentsModel.findOneAndUpdate(
+              { _id: _student._id },
+              { $addToSet: { groupId: group._id } },
+            );
+
+            await this.userModel.findOneAndUpdate(
+              { _id: uid },
+
+              { $addToSet: { groupId: group._id } },
+            );
+          }),
+        );
       }
 
       let client_secret = null;
@@ -145,7 +170,7 @@ export class UserService {
         throw new NotFoundException('Student not found!');
       }
 
-      await this.studentsModel.findByIdAndUpdate(uid, {
+      const _student = await this.studentsModel.findByIdAndUpdate(uid, {
         dateOfBirth: body.dateOfBirth,
         country: body.country,
         city: body.city,
@@ -153,6 +178,20 @@ export class UserService {
         daysPerWeek: body.daysPerWeek,
         freeSessionDate: body.freeSessionDate,
       });
+
+      await Promise.all(
+        body.subjects.map(async (subject) => {
+          const group = await this.groupModel.create({
+            members: [_student._id],
+            subject: subject,
+          });
+
+          await this.studentsModel.findOneAndUpdate(
+            { _id: _student._id },
+            { $addToSet: { groupId: group._id } },
+          );
+        }),
+      );
 
       res.status(200).json({
         success: true,
