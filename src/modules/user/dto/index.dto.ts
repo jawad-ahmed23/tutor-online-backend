@@ -23,7 +23,7 @@ export class StudentDto {
   daysPerWeek: number;
 
   @ApiProperty()
-  freeSessionDate: [string];
+  freeSessionDateId: [string];
 }
 
 class paymentDetailsDto {

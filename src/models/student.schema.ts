@@ -46,7 +46,7 @@ export class Students {
   daysPerWeek: number;
 
   @Prop()
-  freeSessionDate: [Date];
+  freeSessionDateId: [string];
 
   @Prop()
   addedBy: string;

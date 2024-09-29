@@ -16,6 +16,7 @@ import { SALT_ROUNDS } from '../../constants';
 import { Students } from '../../models/student.schema';
 import { Complaints } from '../../models/complaints.schema';
 import { Group } from '../../models/group.schema';
+import { Sessions } from '../../models/sessions.schema';
 import { PaymentService } from '../payment/payment.service';
 
 //import { UserRole, UserStatus } from '../../constants';
@@ -79,6 +80,8 @@ export class UserService {
           addedBy: uid,
           verified: true,
         });
+
+        await 
 
         const _members = [_student._id, uid];
 
@@ -183,7 +186,7 @@ export class UserService {
         city: body.city,
         subjects: body.subjects,
         daysPerWeek: body.daysPerWeek,
-        freeSessionDate: body.freeSessionDate,
+        freeSessionDateId: body.freeSessionDateId,
       });
 
       await Promise.all(
