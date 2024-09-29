@@ -32,7 +32,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     socket: Socket,
     { groupId, userId }: { groupId: string; userId: string },
   ) {
-    socket.join(groupId);
     try {
       const chatHistory = await this.chatsService.getChatHistory(
         new Types.ObjectId(groupId),
@@ -57,6 +56,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       senderId: string;
       senderRole: string;
       message: string;
+      name: string;
     },
   ) {
     try {
@@ -66,6 +66,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         senderRole,
         message,
       );
+
       this.server.to(groupId).emit('newMessage', newMessage);
     } catch (error) {
       console.error(error);

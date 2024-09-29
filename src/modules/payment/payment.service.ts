@@ -330,6 +330,7 @@ export class PaymentService {
         const options = {
           customer: user.customerId,
           items: [{ price: priceId }],
+          // TODO: store student ID in subscription
           metadata: {
             uid: uid,
           },
