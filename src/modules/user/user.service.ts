@@ -16,18 +16,19 @@ import { SALT_ROUNDS } from '../../constants';
 import { Students } from '../../models/student.schema';
 import { Complaints } from '../../models/complaints.schema';
 import { PaymentService } from '../payment/payment.service';
+
 //import { UserRole, UserStatus } from '../../constants';
 
 @Injectable()
 export class UserService {
   constructor(
+    private readonly paymentService: PaymentService,
     @InjectModel(User.name)
     private userModel: Model<User>,
     @InjectModel(Students.name)
     private studentsModel: Model<Students>,
     @InjectModel(Complaints.name)
     private complaintsModel: Model<Complaints>,
-    private readonly paymentService: PaymentService,
   ) {}
 
   async getStudents(uid: string, res: Res) {
@@ -47,7 +48,7 @@ export class UserService {
 
   async addStudents(uid: string, body: AddStudentsDto, res: Res) {
     try {
-      const { students, proceedToPayment, priceId } = body;
+      const { students, proceedToPayment, prices } = body;
 
       const _students = [];
 
@@ -81,10 +82,16 @@ export class UserService {
 
       if (proceedToPayment) {
         const res = await this.paymentService.createSetupIntent(
-          user.customerId,
+          user._id.toString(),
         );
 
         client_secret = res.client_secret;
+      } else {
+        // create inactive subscription
+        this.paymentService.createIncompleteSubscription(
+          user._id.toString(),
+          prices,
+        );
       }
 
       return res.json({
