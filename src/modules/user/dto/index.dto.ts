@@ -48,7 +48,7 @@ export class AddStudentsDto {
   proceedToPayment: boolean;
 
   @ApiProperty()
-  priceId: string;
+  prices: string[];
 }
 
 export class AddComplaintDto {
