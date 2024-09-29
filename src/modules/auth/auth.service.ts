@@ -49,7 +49,9 @@ export class AuthService {
       }
 
       if (!user) {
-        user = await this.studentsModel.findOne({ _id: uid });
+        user = await this.studentsModel
+          .findOne({ _id: uid })
+          .populate('groupId');
 
         // assigning role as student if it's a student
         user = { ...user._doc, role: 'student' };

@@ -36,7 +36,9 @@ export class UserService {
 
   async getStudents(uid: string, res: Res) {
     try {
-      const students = await this.studentsModel.find({ addedBy: uid });
+      const students = await this.studentsModel
+        .find({ addedBy: uid })
+        .populate('groupId');
 
       return res.json({
         message: 'students added successfully!',
@@ -128,6 +130,38 @@ export class UserService {
     } catch (err) {
       console.log(err);
       throw new BadRequestException({ message: err.message, success: false });
+    }
+  }
+
+  async getSingleStudent(query: { studentId: string }, uid: string) {
+    try {
+      const user = await this.userModel.findById(uid);
+
+      const { studentId } = query;
+
+      if (!user) {
+        throw new NotFoundException({
+          success: false,
+          message: 'User not found!',
+        });
+      }
+
+      const student = await this.studentsModel.findById(studentId);
+
+      if (!student) {
+        throw new NotFoundException({
+          success: false,
+          message: 'No student found!',
+        });
+      }
+
+      return {
+        success: true,
+        student,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException({ message: error.message, success: false });
     }
   }
 
