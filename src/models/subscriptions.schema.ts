@@ -1,24 +1,33 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-export type PriceDocument = HydratedDocument<Price>;
+export type SubscriptionDocument = HydratedDocument<Subscription>;
 
 @Schema({ timestamps: true })
-export class Price {
-  @Prop({ type: String, unique: true })
-  plan: string;
+export class Subscription {
+  @Prop({ type: String })
+  userId: string;
 
   @Prop({ type: String })
-  price: string;
+  name: string;
+
+  @Prop({ type: Number })
+  amount: number;
+
+  @Prop({ type: String })
+  currency: string;
+
+  @Prop({ type: String })
+  subscriptionId: string;
 
   @Prop({ type: Date })
   startDate: Date;
 
-  @Prop({ type: String })
-  recurring: string;
+  @Prop({ type: String }) // pending | active | incomplete
+  status: string;
 
-  @Prop({ type: Boolean })
-  isActive: boolean;
+  @Prop({ type: String })
+  paymentIntent?: string;
 }
 
-export const PriceSchema = SchemaFactory.createForClass(Price);
+export const SubscriptionSchema = SchemaFactory.createForClass(Subscription);
