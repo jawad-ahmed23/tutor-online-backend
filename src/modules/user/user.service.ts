@@ -33,6 +33,8 @@ export class UserService {
     private complaintsModel: Model<Complaints>,
     @InjectModel(Group.name)
     private groupModel: Model<Group>,
+    @InjectModel(Sessions.name)
+    private sessionsModel: Model<Sessions>,
   ) {}
 
   async getStudents(uid: string, res: Res) {
@@ -81,7 +83,17 @@ export class UserService {
           verified: true,
         });
 
-        await 
+        await Promise.all(
+          student.freeSessionDateIds.map(async (sessionId) => {
+            await this.sessionsModel.findOneAndUpdate(
+              { _id: sessionId },
+              {
+                isAssigned: true,
+                assignedTo: _student._id,
+              },
+            );
+          }),
+        );
 
         const _members = [_student._id, uid];
 
@@ -186,8 +198,20 @@ export class UserService {
         city: body.city,
         subjects: body.subjects,
         daysPerWeek: body.daysPerWeek,
-        freeSessionDateId: body.freeSessionDateId,
+        freeSessionDate: body.freeSessionDateIds,
       });
+
+      await Promise.all(
+        body.freeSessionDateIds.map(async (sessionId) => {
+          await this.sessionsModel.findOneAndUpdate(
+            { _id: sessionId },
+            {
+              isAssigned: true,
+              assignedTo: _student._id,
+            },
+          );
+        }),
+      );
 
       await Promise.all(
         body.subjects.map(async (subject) => {

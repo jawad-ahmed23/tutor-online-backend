@@ -15,7 +15,7 @@ export class SessionsService {
 
   async getSessions(res: Res) {
     try {
-      const sessions = await this.sessionsModel.find();
+      const sessions = await this.sessionsModel.find({ isAssigned: false });
 
       return res.json({
         sessions,
