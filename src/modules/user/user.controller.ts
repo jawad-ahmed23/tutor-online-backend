@@ -5,6 +5,7 @@ import {
   Body,
   Response,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { Response as Res } from 'express';
 import { Uid } from '../../decorator/uid.decorator';
@@ -35,6 +36,12 @@ export class UserController {
     @Response() res: Res,
   ) {
     return this.userService.addStudents(uid, addStudentsDto, res);
+  }
+
+  @UseGuards(RolesGuard)
+  @Get('/get-student')
+  async getStudent(@Uid() uid: string, @Query() query: { studentId: string }) {
+    return this.userService.getSingleStudent(query, uid);
   }
 
   @Roles(Role.PARENT)

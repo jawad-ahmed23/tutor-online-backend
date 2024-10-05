@@ -21,6 +21,8 @@ export class ChatsService {
     senderRole: string,
     message: string,
   ): Promise<Message> {
+    console.log('groupId', groupId);
+    console.log('senderId', senderId);
     const newMessage = new this.messageModel({
       groupId,
       senderId,

@@ -56,7 +56,7 @@ export class User {
   @Prop({ default: false })
   verified: boolean;
 
-  @Prop({ type: [Types.ObjectId], default: [] })
+  @Prop({ type: [Types.ObjectId], default: [], ref: 'Group' })
   groupId: Types.ObjectId[];
 }
 
