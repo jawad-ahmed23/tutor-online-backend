@@ -10,6 +10,7 @@ import {
   SubscriptionSchema,
 } from '../../models/subscriptions.schema';
 import { Invoice, InvoiceSchema } from 'src/models/invoices.schema';
+import { Students, StudentsSchema } from 'src/models/student.schema';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { Invoice, InvoiceSchema } from 'src/models/invoices.schema';
       { name: User.name, schema: UserSchema },
       { name: Subscription.name, schema: SubscriptionSchema },
       { name: Invoice.name, schema: InvoiceSchema },
+      { name: Students.name, schema: StudentsSchema },
     ]),
   ],
   controllers: [PaymentController],

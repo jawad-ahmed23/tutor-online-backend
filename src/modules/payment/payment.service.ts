@@ -18,6 +18,7 @@ import { User } from 'src/models/user.schema';
 import { Subscription } from 'src/models/subscriptions.schema';
 import config from '../../config';
 import { Invoice } from 'src/models/invoices.schema';
+import { Students } from 'src/models/student.schema';
 
 @Injectable()
 export class PaymentService {
@@ -34,6 +35,8 @@ export class PaymentService {
     private InvoiceModel: Model<Invoice>,
     @InjectModel(Subscription.name)
     private SubscriptionModel: Model<Subscription>,
+    @InjectModel(Students.name)
+    private StudentModel: Model<Students>,
   ) {
     this.stripe = new Stripe(configs().STRIPE.SECRET_KEY, {
       apiVersion: '2024-06-20',
@@ -320,19 +323,20 @@ export class PaymentService {
         });
       }
 
-      for (const priceId of prices) {
-        const price = await this.stripe.prices.retrieve(priceId);
+      for (const price of prices) {
+        const _price = await this.stripe.prices.retrieve(price.priceId);
 
         const product = await this.stripe.products.retrieve(
-          price.product.toString(),
+          _price.product.toString(),
         );
 
         const options = {
           customer: user.customerId,
-          items: [{ price: priceId }],
+          items: [{ price: price.priceId }],
           // TODO: store student ID in subscription
           metadata: {
             uid: uid,
+            studentId: price.studentId,
           },
         };
 
@@ -341,19 +345,21 @@ export class PaymentService {
         // store subscriptions info in mongodb
         await this.SubscriptionModel.create({
           startDate: new Date(),
-          status: subscription.status,
+          // status: subscription.status,
+          status: 'pending',
           subscriptionId: subscription.id,
           userId: uid,
           name: product.name,
-          amount: price.unit_amount / 100,
-          currency: price.currency,
+          amount: _price.unit_amount / 100,
+          currency: _price.currency,
+          student: price.studentId,
         });
 
         await this.InvoiceModel.create({
-          amount: price.unit_amount / 100,
-          currency: price.currency,
+          amount: _price.unit_amount / 100,
+          currency: _price.currency,
           invoiceId: subscription.latest_invoice,
-          status: subscription.status,
+          status: 'unpaid',
           userId: uid,
         });
       }
@@ -368,7 +374,10 @@ export class PaymentService {
     }
   }
 
-  async createIncompleteSubscription(uid: string, prices: string[]) {
+  async createIncompleteSubscription(
+    uid: string,
+    prices: { priceId: string; studentId: string }[],
+  ) {
     try {
       const user = await this.UserModel.findById(uid);
 
@@ -379,18 +388,19 @@ export class PaymentService {
         });
       }
 
-      for (const priceId of prices) {
-        const price = await this.stripe.prices.retrieve(priceId);
+      for (const price of prices) {
+        const _price = await this.stripe.prices.retrieve(price.priceId);
 
         const product = await this.stripe.products.retrieve(
-          price.product.toString(),
+          _price.product.toString(),
         );
 
         const subscription = await this.stripe.subscriptions.create({
           customer: user.customerId,
-          items: [{ price: priceId }],
+          items: [{ price: price.priceId }],
           metadata: {
             uid: uid,
+            studentId: price.studentId,
           },
           payment_behavior: 'default_incomplete',
           expand: ['latest_invoice.payment_intent'],
@@ -403,11 +413,21 @@ export class PaymentService {
           subscriptionId: subscription.id,
           userId: uid,
           name: product.name,
-          amount: price.unit_amount / 100,
-          currency: price.currency,
+          amount: _price.unit_amount / 100,
+          currency: _price.currency,
           paymentIntent:
             // @ts-ignore
             subscription.latest_invoice.payment_intent.client_secret,
+          student: price.studentId,
+        });
+
+        await this.InvoiceModel.create({
+          amount: _price.unit_amount / 100,
+          currency: _price.currency,
+          // @ts-ignore
+          invoiceId: subscription.latest_invoice.id,
+          status: 'unpaid',
+          userId: uid,
         });
       }
 
@@ -415,7 +435,13 @@ export class PaymentService {
         success: true,
         message: 'Subscriptions created successfully!',
       };
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException({
+        success: false,
+        message: error.message,
+      });
+    }
   }
 
   async getUserSubscriptions(uid: string) {
@@ -431,7 +457,7 @@ export class PaymentService {
 
       const subscriptions = await this.SubscriptionModel.find({
         userId: uid,
-      });
+      }).populate('student');
 
       return { success: true, subscriptions };
     } catch (error) {
@@ -517,10 +543,44 @@ export class PaymentService {
         throw new BadRequestException(`Webhook Error: ${error.message}`);
       }
 
-      console.log('Event Type', event.type);
-
       switch (event.type) {
+        case 'invoice.paid':
+          const data = event.data.object;
+
+          const { uid, studentId } = data.subscription_details.metadata;
+
+          const subscriptionId = data.subscription;
+
+          // update subscription
+          await this.SubscriptionModel.findOneAndUpdate(
+            {
+              subscriptionId: subscriptionId,
+            },
+            {
+              status: 'active',
+            },
+          );
+
+          await this.InvoiceModel.findOneAndUpdate(
+            {
+              invoiceId: data.id,
+            },
+            {
+              status: 'paid',
+            },
+          );
+
+          // update student
+          await this.StudentModel.findByIdAndUpdate(studentId, {
+            status: 'active',
+          });
+
+          break;
+        default:
+          console.log(`Unhandled event type ${event.type}`);
       }
+
+      return 'success!';
     } catch (error) {
       console.log(error);
       throw new BadRequestException(`Webhook Error: ${error.message}`);

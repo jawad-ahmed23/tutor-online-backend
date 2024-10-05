@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 
 export type SubscriptionDocument = HydratedDocument<Subscription>;
 
@@ -28,6 +28,9 @@ export class Subscription {
 
   @Prop({ type: String })
   paymentIntent?: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'Students' })
+  student: Types.ObjectId;
 }
 
 export const SubscriptionSchema = SchemaFactory.createForClass(Subscription);

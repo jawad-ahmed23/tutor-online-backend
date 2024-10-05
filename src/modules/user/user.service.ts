@@ -53,25 +53,19 @@ export class UserService {
 
   async addStudents(uid: string, body: AddStudentsDto, res: Res) {
     try {
-      const { students, proceedToPayment, prices } = body;
+      const { students, proceedToPayment } = body;
 
       const _students = [];
 
       const user = await this.userModel.findById(uid);
+
+      const prices = [];
 
       for (const student of students) {
         const username = await this._generateUniqueUsername(student.name);
         const randomId = new ShortUniqueId({ length: 12 });
         const password = randomId.rnd();
         const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-
-        _students.push({
-          ...student,
-          username,
-          password: hashedPassword,
-          tempPassword: password,
-          addedBy: uid,
-        });
 
         const _student = await this.studentsModel.create({
           ...student,
@@ -80,6 +74,20 @@ export class UserService {
           tempPassword: password,
           addedBy: uid,
           verified: true,
+        });
+
+        _students.push({
+          ...student,
+          id: _student._id,
+          username,
+          password: hashedPassword,
+          tempPassword: password,
+          addedBy: uid,
+        });
+
+        prices.push({
+          priceId: student.priceId,
+          studentId: _student._id.toString(),
         });
 
         const _members = [_student._id, uid];
@@ -250,7 +258,7 @@ export class UserService {
 
     while (!isUnique) {
       const code = Math.floor(1000 + Math.random() * 900000).toString();
-      username = `${name}_${code}`;
+      username = `${name.replace(' ', '_').toLowerCase()}_${code}`;
       const existingCode = await this.studentsModel.findOne({
         username: username,
       });
