@@ -12,29 +12,29 @@ export class TasksController {
 
   @Roles(Role.PARENT)
   @UseGuards(RolesGuard)
-  @Get('/get-students-homework')
+  @Get('/homeworks')
   async getStudentsHomeWork(@Uid() uid: string, @Response() res: Res) {
     return this.attendanceService.getStudentsHomeWork(uid, res);
   }
 
   @Roles(Role.STUDENT)
   @UseGuards(RolesGuard)
-  @Get('/get-student-homework')
-  async getStudentHomeWork(@Uid() uid: string, @Response() res: Res) {
-    return this.attendanceService.getStudentHomeWork(uid, res);
+  @Get('/homework')
+  async getSingleStudentHomeWork(@Uid() uid: string, @Response() res: Res) {
+    return this.attendanceService.getSingleStudentHomeWork(uid, res);
   }
 
   @Roles(Role.PARENT)
   @UseGuards(RolesGuard)
-  @Get('/get-students-assessment')
+  @Get('/assessments')
   async getStudentsAssessment(@Uid() uid: string, @Response() res: Res) {
     return this.attendanceService.getStudentsAssessment(uid, res);
   }
 
   @Roles(Role.STUDENT)
   @UseGuards(RolesGuard)
-  @Get('/get-student-assessment')
-  async getStudentAssessment(@Uid() uid: string, @Response() res: Res) {
-    return this.attendanceService.getStudentAssessment(uid, res);
+  @Get('/assessment')
+  async getSingleStudentAssessment(@Uid() uid: string, @Response() res: Res) {
+    return this.attendanceService.getSingleStudentAssessment(uid, res);
   }
 }

@@ -12,15 +12,15 @@ export class AttendanceController {
 
   @Roles(Role.PARENT)
   @UseGuards(RolesGuard)
-  @Get('/get-students-attendance')
+  @Get()
   async getStudentsAttendance(@Uid() uid: string, @Response() res: Res) {
     return this.attendanceService.getStudentsAttendance(uid, res);
   }
 
   @Roles(Role.STUDENT)
   @UseGuards(RolesGuard)
-  @Get('/get-student-attendance')
-  async getStudentAttendance(@Uid() uid: string, @Response() res: Res) {
-    return this.attendanceService.getStudentAttendance(uid, res);
+  @Get('/single')
+  async getSingleStudentAttendance(@Uid() uid: string, @Response() res: Res) {
+    return this.attendanceService.getSingleStudentAttendance(uid, res);
   }
 }

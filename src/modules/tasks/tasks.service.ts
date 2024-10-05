@@ -14,38 +14,6 @@ export class TasksService {
     private homeworkModel: Model<Homework>,
   ) {}
 
-  async getStudentsAssessment(uid: string, res: Res) {
-    try {
-      const assessments = await this.assessmentModel
-        .find({ parent: uid })
-        .populate('student');
-
-      return res.json({
-        assessments,
-        success: true,
-      });
-    } catch (err) {
-      console.log(err);
-      throw new BadRequestException({ message: err.message, success: false });
-    }
-  }
-
-  async getStudentAssessment(uid: string, res: Res) {
-    try {
-      const attendance = await this.assessmentModel
-        .find({ student: uid })
-        .populate('student');
-
-      return res.json({
-        attendance,
-        success: true,
-      });
-    } catch (err) {
-      console.log(err);
-      throw new BadRequestException({ message: err.message, success: false });
-    }
-  }
-
   async getStudentsHomeWork(uid: string, res: Res) {
     try {
       const assessments = await this.homeworkModel
@@ -62,9 +30,41 @@ export class TasksService {
     }
   }
 
-  async getStudentHomeWork(uid: string, res: Res) {
+  async getSingleStudentHomeWork(uid: string, res: Res) {
     try {
       const attendance = await this.homeworkModel
+        .find({ student: uid })
+        .populate('student');
+
+      return res.json({
+        attendance,
+        success: true,
+      });
+    } catch (err) {
+      console.log(err);
+      throw new BadRequestException({ message: err.message, success: false });
+    }
+  }
+
+  async getStudentsAssessment(uid: string, res: Res) {
+    try {
+      const assessments = await this.assessmentModel
+        .find({ parent: uid })
+        .populate('student');
+
+      return res.json({
+        assessments,
+        success: true,
+      });
+    } catch (err) {
+      console.log(err);
+      throw new BadRequestException({ message: err.message, success: false });
+    }
+  }
+
+  async getSingleStudentAssessment(uid: string, res: Res) {
+    try {
+      const attendance = await this.assessmentModel
         .find({ student: uid })
         .populate('student');
 

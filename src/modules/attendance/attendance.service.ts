@@ -27,7 +27,7 @@ export class AttendanceService {
     }
   }
 
-  async getStudentAttendance(uid: string, res: Res) {
+  async getSingleStudentAttendance(uid: string, res: Res) {
     try {
       const attendance = await this.attendanceModel
         .find({ attendant: uid })
