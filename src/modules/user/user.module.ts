@@ -14,6 +14,7 @@ import {
   SubscriptionSchema,
 } from '../../models/subscriptions.schema';
 import { Invoice, InvoiceSchema } from 'src/models/invoices.schema';
+import { Sessions, SessionsSchema } from '../../models/sessions.schema';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { Invoice, InvoiceSchema } from 'src/models/invoices.schema';
       { name: Product.name, schema: ProductSchema },
       { name: Subscription.name, schema: SubscriptionSchema },
       { name: Invoice.name, schema: InvoiceSchema },
+      { name: Sessions.name, schema: SessionsSchema },
     ]),
   ],
   controllers: [UserController],

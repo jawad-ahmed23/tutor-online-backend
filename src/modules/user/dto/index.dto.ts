@@ -27,6 +27,9 @@ export class StudentDto {
 
   @ApiProperty()
   priceId: string;
+
+  @ApiProperty()
+  freeSessionDateIds: string[];
 }
 
 class paymentDetailsDto {
