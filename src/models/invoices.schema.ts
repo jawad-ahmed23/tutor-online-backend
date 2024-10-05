@@ -14,7 +14,7 @@ export class Invoice {
   @Prop({ type: String })
   currency: string;
 
-  @Prop({ type: String })
+  @Prop({ type: String }) // unpaid | failed | paid
   status: string;
 
   @Prop({ type: String })

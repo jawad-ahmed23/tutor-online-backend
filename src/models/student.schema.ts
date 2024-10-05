@@ -67,6 +67,9 @@ export class Students {
 
   @Prop({ type: [Types.ObjectId], default: [], ref: 'Group' })
   groupId: Types.ObjectId[];
+
+  @Prop({ type: String, default: 'inactive' }) // inactive | active
+  status: string;
 }
 
 export const StudentsSchema = SchemaFactory.createForClass(Students);

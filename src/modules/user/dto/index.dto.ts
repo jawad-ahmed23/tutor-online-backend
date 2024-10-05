@@ -23,6 +23,12 @@ export class StudentDto {
   daysPerWeek: number;
 
   @ApiProperty()
+  freeSessionDate: [string];
+
+  @ApiProperty()
+  priceId: string;
+
+  @ApiProperty()
   freeSessionDateIds: string[];
 }
 
@@ -40,6 +46,14 @@ class paymentDetailsDto {
   cardholderName: string;
 }
 
+class Prices {
+  @ApiProperty()
+  priceId: string;
+
+  @ApiProperty()
+  studentId: string;
+}
+
 export class AddStudentsDto {
   @ApiProperty()
   students: [StudentDto];
@@ -48,7 +62,7 @@ export class AddStudentsDto {
   proceedToPayment: boolean;
 
   @ApiProperty()
-  prices: string[];
+  prices: Prices[];
 }
 
 export class AddComplaintDto {

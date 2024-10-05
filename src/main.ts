@@ -5,14 +5,16 @@ import { AppModule } from './app.module';
 // import { HttpErrorFilter } from './filters/http-error.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true,
+  });
   const corsOptions = {
     origin: ['http://localhost:3003'],
     exposedHeaders: 'X-A', // ⬅️ exposes custom response headers
   };
 
-  app.use(bodyParser.json({ limit: '50mb' }));
-  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+  // app.use(bodyParser.json({ limit: '50mb' }));
+  // app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.enableCors(corsOptions);
   // app.useGlobalFilters(new HttpErrorFilter());
 

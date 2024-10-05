@@ -45,8 +45,6 @@ export class AuthMiddleware implements NestMiddleware {
         });
       }
 
-      console.log('userData', userData);
-
       //   let userR0es: any;
       //   const permissions = [];
 
