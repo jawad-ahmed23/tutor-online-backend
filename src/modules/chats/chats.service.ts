@@ -29,7 +29,7 @@ export class ChatsService {
     console.log('groupId', groupId);
     console.log('senderId', senderId);
     let user;
-    if (Role.STUDENT) {
+    if (Role.STUDENT === senderRole) {
       user = await this.studentsModel.findOne({ _id: senderId });
     } else {
       user = await this.userModel.findOne({ _id: senderId });

@@ -16,12 +16,12 @@ export class TasksService {
 
   async getStudentsHomeWork(uid: string, res: Res) {
     try {
-      const assessments = await this.homeworkModel
+      const homeworks = await this.homeworkModel
         .find({ parent: uid })
         .populate('student');
 
       return res.json({
-        assessments,
+        homeworks,
         success: true,
       });
     } catch (err) {
@@ -32,12 +32,12 @@ export class TasksService {
 
   async getSingleStudentHomeWork(uid: string, res: Res) {
     try {
-      const attendance = await this.homeworkModel
+      const homework = await this.homeworkModel
         .find({ student: uid })
         .populate('student');
 
       return res.json({
-        attendance,
+        homework,
         success: true,
       });
     } catch (err) {
@@ -64,12 +64,12 @@ export class TasksService {
 
   async getSingleStudentAssessment(uid: string, res: Res) {
     try {
-      const attendance = await this.assessmentModel
+      const assessment = await this.assessmentModel
         .find({ student: uid })
         .populate('student');
 
       return res.json({
-        attendance,
+        assessment,
         success: true,
       });
     } catch (err) {
