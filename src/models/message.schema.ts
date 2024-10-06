@@ -11,6 +11,9 @@ export class Message extends Document {
   @Prop({ type: Types.ObjectId, required: true })
   senderId: Types.ObjectId;
 
+  @Prop({ type: String, required: true })
+  username: string;
+
   @Prop({ required: true })
   senderRole: string;
 

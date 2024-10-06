@@ -1,7 +1,6 @@
 import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MailerModule } from '@nestjs-modules/mailer';
-
 import { User, UserSchema } from './models/user.schema';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -13,6 +12,8 @@ import { AuthMiddleware } from './middlewares';
 import { ChatsModule } from './modules/chats/chats.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { AdminPaymentModule } from './modules/admin/payment/payment.module';
+import { AttendanceModule } from './modules/attendance/attendance.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 
 @Module({
   imports: [
@@ -36,6 +37,8 @@ import { AdminPaymentModule } from './modules/admin/payment/payment.module';
     ChatsModule,
     PaymentModule,
     AdminPaymentModule,
+    AttendanceModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],
