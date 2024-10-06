@@ -178,7 +178,9 @@ export class UserService {
         });
       }
 
-      const student = await this.studentsModel.findById(studentId);
+      const student = await this.studentsModel
+        .findById(studentId)
+        .populate('freeSessions');
 
       if (!student) {
         throw new NotFoundException({

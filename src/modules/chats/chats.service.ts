@@ -28,11 +28,13 @@ export class ChatsService {
   ): Promise<Message> {
     console.log('groupId', groupId);
     console.log('senderId', senderId);
+
     let user;
+
     if (Role.STUDENT === senderRole) {
-      user = await this.studentsModel.findOne({ _id: senderId });
+      user = await this.studentsModel.findById(senderId);
     } else {
-      user = await this.userModel.findOne({ _id: senderId });
+      user = await this.userModel.findById(senderId);
     }
     const newMessage = new this.messageModel({
       groupId,
