@@ -22,14 +22,14 @@ export class StudentDto {
   @ApiProperty()
   daysPerWeek: number;
 
-  @ApiProperty()
-  freeSessionDate: [string];
+  // @ApiProperty()
+  // freeSessionDate: [string];
 
   @ApiProperty()
   priceId: string;
 
   @ApiProperty()
-  freeSessionDateIds: string[];
+  freeSessions: string[];
 }
 
 class paymentDetailsDto {
@@ -71,4 +71,27 @@ export class AddComplaintDto {
 
   @ApiProperty()
   message: string;
+}
+
+export class SessionSwapDto {
+  // currentSession: "2024-10-10T09:00:00.000Z"
+  // reason: "fsdfdsfdsfsdf"
+  // requestFor: "makeover"
+  // student: "6701865bdad2dce81c135945"
+  // swapSession: "2024-10-09T08:00:00.000Z"
+
+  @ApiProperty()
+  currentSession: string;
+
+  @ApiProperty()
+  reason: string;
+
+  @ApiProperty()
+  requestFor: string;
+
+  @ApiProperty()
+  student: string;
+
+  @ApiProperty()
+  swapSession: string;
 }

@@ -6,11 +6,11 @@ export type SessionsDocument = HydratedDocument<Sessions>;
 
 @Schema({ timestamps: true })
 export class Sessions {
-  @Prop({ required: true })
-  date: Date;
+  @Prop({ type: String, required: true })
+  date: string;
 
-  @Prop({ required: true })
-  time: Date;
+  @Prop({ type: String, required: true })
+  time: string;
 
   @Prop({
     enum: {

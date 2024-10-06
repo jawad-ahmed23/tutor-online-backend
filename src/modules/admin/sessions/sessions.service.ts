@@ -36,7 +36,7 @@ export class SessionsService {
           date: session.date,
           time: session.time,
           type: session.type,
-          isAssigned: session.isAssigned,
+          isAssigned: false,
         });
       }
 

@@ -10,7 +10,12 @@ import {
 import { Response as Res } from 'express';
 import { Uid } from '../../decorator/uid.decorator';
 import { UserService } from './user.service';
-import { AddStudentsDto, AddComplaintDto, StudentDto } from './dto/index.dto';
+import {
+  AddStudentsDto,
+  AddComplaintDto,
+  StudentDto,
+  SessionSwapDto,
+} from './dto/index.dto';
 
 import { RolesGuard } from '../../guard/roles.guard';
 import { Roles } from '../../decorator/role.decorator';
@@ -61,6 +66,7 @@ export class UserController {
   ) {
     return this.userService.addComplaint(uid, addComplaintDto, res);
   }
+
   @Roles(Role.STUDENT)
   @UseGuards(RolesGuard)
   @Post('/on-board-single-student')
@@ -70,5 +76,22 @@ export class UserController {
     @Response() res: Res,
   ) {
     return this.userService.onBoardSingleStudent(uid, studentDto, res);
+  }
+
+  @Roles(Role.PARENT, Role.STUDENT)
+  @UseGuards(RolesGuard)
+  @Post('/session-swaps')
+  async createSessionSwapRequest(
+    @Uid() uid: string,
+    @Body() body: SessionSwapDto,
+  ) {
+    return this.userService.createSessionSwapRequest(uid, body);
+  }
+
+  @Roles(Role.PARENT, Role.STUDENT)
+  @UseGuards(RolesGuard)
+  @Get('/session-swaps')
+  async getSessionSwapRequest(@Uid() uid: string) {
+    return this.userService.getSessionSwapRequest(uid);
   }
 }

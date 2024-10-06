@@ -10,13 +10,19 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import ShortUniqueId from 'short-unique-id';
 import * as bcrypt from 'bcrypt';
-import { AddComplaintDto, AddStudentsDto, StudentDto } from './dto/index.dto';
+import {
+  AddComplaintDto,
+  AddStudentsDto,
+  StudentDto,
+  SessionSwapDto,
+} from './dto/index.dto';
 import { User } from '../../models/user.schema';
 import { SALT_ROUNDS } from '../../constants';
 import { Students } from '../../models/student.schema';
 import { Complaints } from '../../models/complaints.schema';
 import { Group } from '../../models/group.schema';
 import { Sessions } from '../../models/sessions.schema';
+import { SessionSwap } from '../../models/session-swap.schema';
 import { PaymentService } from '../payment/payment.service';
 
 //import { UserRole, UserStatus } from '../../constants';
@@ -35,13 +41,16 @@ export class UserService {
     private groupModel: Model<Group>,
     @InjectModel(Sessions.name)
     private sessionsModel: Model<Sessions>,
+    @InjectModel(SessionSwap.name)
+    private sessionSwapModel: Model<SessionSwap>,
   ) {}
 
   async getStudents(uid: string, res: Res) {
     try {
       const students = await this.studentsModel
         .find({ addedBy: uid })
-        .populate('groupId');
+        .populate('groupId')
+        .populate('freeSessions');
 
       return res.json({
         message: 'students added successfully!',
@@ -94,7 +103,7 @@ export class UserService {
         });
 
         await Promise.all(
-          student.freeSessionDateIds.map(async (sessionId) => {
+          student.freeSessions.map(async (sessionId) => {
             await this.sessionsModel.findOneAndUpdate(
               { _id: sessionId },
               {
@@ -240,11 +249,11 @@ export class UserService {
         city: body.city,
         subjects: body.subjects,
         daysPerWeek: body.daysPerWeek,
-        freeSessionDate: body.freeSessionDateIds,
+        freeSessions: body.freeSessions,
       });
 
       await Promise.all(
-        body.freeSessionDateIds.map(async (sessionId) => {
+        body.freeSessions.map(async (sessionId) => {
           await this.sessionsModel.findOneAndUpdate(
             { _id: sessionId },
             {
@@ -276,6 +285,44 @@ export class UserService {
     } catch (err) {
       console.log(err);
       throw new BadRequestException({ message: err.message, success: false });
+    }
+  }
+
+  // session swap request endpoint
+  async createSessionSwapRequest(uid: string, body: SessionSwapDto) {
+    const { currentSession, swapSession, requestFor, reason, student } = body;
+
+    try {
+      await this.sessionSwapModel.create({
+        currentSession,
+        swapSession,
+        requestFor,
+        reason,
+        student,
+        requestedBy: uid,
+      });
+
+      return {
+        success: true,
+        message: 'Session Swap request created successfully',
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException({ message: error.message, success: false });
+    }
+  }
+
+  async getSessionSwapRequest(uid: string) {
+    try {
+      const requests = await this.sessionSwapModel.find({ requestedBy: uid });
+
+      return {
+        success: true,
+        requests,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException({ message: error.message, success: false });
     }
   }
 

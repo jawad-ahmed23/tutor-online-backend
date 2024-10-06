@@ -14,6 +14,7 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { AdminPaymentModule } from './modules/admin/payment/payment.module';
 import { AttendanceModule } from './modules/attendance/attendance.module';
 import { TasksModule } from './modules/tasks/tasks.module';
+import { SessionsModule } from './modules/admin/sessions/sessions.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { TasksModule } from './modules/tasks/tasks.module';
     AdminPaymentModule,
     AttendanceModule,
     TasksModule,
+    SessionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -56,6 +58,7 @@ export class AppModule {
         { path: '/admin/payment/prices', method: RequestMethod.ALL },
         { path: '/admin/prices', method: RequestMethod.ALL },
         { path: '/payment/webhook', method: RequestMethod.POST },
+        { path: '/sessions', method: RequestMethod.POST },
       )
       .forRoutes({ path: '/*', method: RequestMethod.ALL });
   }
