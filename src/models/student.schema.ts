@@ -45,8 +45,8 @@ export class Students {
   @Prop()
   daysPerWeek: number;
 
-  @Prop()
-  freeSessionDate: string[];
+  @Prop({ type: [Types.ObjectId], default: [], ref: 'Sessions' })
+  freeSessions: Types.ObjectId[];
 
   @Prop()
   addedBy: string;

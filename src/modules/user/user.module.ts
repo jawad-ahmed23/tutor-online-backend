@@ -15,6 +15,10 @@ import {
 } from '../../models/subscriptions.schema';
 import { Invoice, InvoiceSchema } from 'src/models/invoices.schema';
 import { Sessions, SessionsSchema } from '../../models/sessions.schema';
+import {
+  SessionSwap,
+  SessionSwapSchema,
+} from '../../models/session-swap.schema';
 
 @Module({
   imports: [
@@ -28,6 +32,7 @@ import { Sessions, SessionsSchema } from '../../models/sessions.schema';
       { name: Subscription.name, schema: SubscriptionSchema },
       { name: Invoice.name, schema: InvoiceSchema },
       { name: Sessions.name, schema: SessionsSchema },
+      { name: SessionSwap.name, schema: SessionSwapSchema },
     ]),
   ],
   controllers: [UserController],

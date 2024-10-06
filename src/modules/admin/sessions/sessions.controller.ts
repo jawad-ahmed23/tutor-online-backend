@@ -19,16 +19,14 @@ import { Role } from '../../../constants';
 export class SessionsController {
   constructor(private readonly userService: SessionsService) {}
 
-  @Roles(Role.PARENT)
+  @Roles(Role.PARENT, Role.STUDENT)
   @UseGuards(RolesGuard)
-  @Get('/get-sessions')
+  @Get()
   async getSessions(@Response() res: Res) {
     return this.userService.getSessions(res);
   }
 
-  @Roles(Role.ADMIN)
-  @UseGuards(RolesGuard)
-  @Post('/add-sessions')
+  @Post()
   async addSessions(
     @Body() addSessionsDto: AddSessionsDto,
     @Response() res: Res,
