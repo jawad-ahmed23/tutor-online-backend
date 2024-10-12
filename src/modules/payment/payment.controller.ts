@@ -33,56 +33,63 @@ export class PaymentController {
     return await this.paymentService.getAllProducts();
   }
 
-  @Roles(Role.PARENT)
+  @Roles(Role.PARENT, Role.STUDENT)
   @UseGuards(RolesGuard)
   @Post('payment-methods')
   async createPaymentMethod(@Body() body: any, @Uid() uid: string) {
     return await this.paymentService.createPaymentMethod(body, uid);
   }
 
-  @Roles(Role.PARENT)
+  @Roles(Role.PARENT, Role.STUDENT)
   @UseGuards(RolesGuard)
   @Post('subscriptions')
   async createSubscription(@Body() body: any, @Uid() uid: string) {
     return await this.paymentService.createSubscription(body, uid);
   }
 
-  @Roles(Role.PARENT)
+  @Roles(Role.PARENT, Role.STUDENT)
+  @UseGuards(RolesGuard)
+  @Post('subscriptions/start')
+  async startSubscription(@Body() body: any, @Uid() uid: string) {
+    return await this.paymentService.startSubscription(body, uid);
+  }
+
+  @Roles(Role.PARENT, Role.STUDENT)
   @UseGuards(RolesGuard)
   @Get('subscriptions')
   async getUserSubscriptions(@Uid() uid: string) {
     return await this.paymentService.getUserSubscriptions(uid);
   }
 
-  @Roles(Role.PARENT)
+  @Roles(Role.PARENT, Role.STUDENT)
   @UseGuards(RolesGuard)
   @Get('invoices')
   async getUserInvoices(@Uid() uid: string) {
     return await this.paymentService.getUserInvoices(uid);
   }
 
-  @Roles(Role.PARENT)
+  @Roles(Role.PARENT, Role.STUDENT)
   @UseGuards(RolesGuard)
   @Post('setup-intent')
   async createSetupIntent(@Uid() uid: string) {
     return await this.paymentService.createSetupIntent(uid);
   }
 
-  @Roles(Role.PARENT)
+  @Roles(Role.PARENT, Role.STUDENT)
   @UseGuards(RolesGuard)
   @Get('cards')
   async getUserCards(@Uid() uid: string) {
     return await this.paymentService.getUserCards(uid);
   }
 
-  @Roles(Role.PARENT)
+  @Roles(Role.PARENT, Role.STUDENT)
   @UseGuards(RolesGuard)
   @Delete('cards')
   async removePaymentMethod(@Body() body: { pId: string }, @Uid() uid: string) {
     return await this.paymentService.removePaymentMethod(body, uid);
   }
 
-  @Roles(Role.PARENT)
+  @Roles(Role.PARENT, Role.STUDENT)
   @UseGuards(RolesGuard)
   @Patch('cards/set-default')
   async setDefaultPaymentMethod(
@@ -92,14 +99,14 @@ export class PaymentController {
     return await this.paymentService.setDefaultPaymentMethod(body, uid);
   }
 
-  @Roles(Role.PARENT)
+  @Roles(Role.PARENT, Role.STUDENT)
   @UseGuards(RolesGuard)
   @Get('info')
   async getUserPaymentInfo(@Uid() uid: string) {
     return await this.paymentService.getUserPaymentInfo(uid);
   }
 
-  @Roles(Role.PARENT)
+  @Roles(Role.PARENT, Role.STUDENT)
   @UseGuards(RolesGuard)
   @Post('attach-card')
   async attachPaymentMethodToUser(

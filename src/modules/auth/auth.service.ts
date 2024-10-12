@@ -104,7 +104,11 @@ export class AuthService {
 
       if (role === 'student') {
         const username = await this._generateUniqueUsername(name);
-        resp = await this.studentsModel.create({ ...userToAdd, username });
+        resp = await this.studentsModel.create({
+          ...userToAdd,
+          username,
+          isSuperUser: true,
+        });
       } else {
         resp = await this.userModel.create({ ...userToAdd, role });
       }
@@ -171,7 +175,13 @@ export class AuthService {
 
   async sendVerificationCode(uid: string, res: Res): Promise<Res> {
     try {
-      const user = await this.userModel.findOne({ _id: uid });
+      let isStudent = false;
+      let user = await this.userModel.findOne({ _id: uid });
+
+      if (!user) {
+        user = await this.studentsModel.findById(uid);
+        isStudent = true;
+      }
 
       const code = await this._generateUniqueVerificationCode();
 
@@ -182,10 +192,17 @@ export class AuthService {
 
       this._sendMail(FROM_VERIFY_EMAIL, user.email, 'Verify Email', message);
 
-      await this.userModel.findOneAndUpdate(
-        { _id: uid },
-        { verification: { code: code, expire: expireDate } },
-      );
+      if (isStudent) {
+        await this.studentsModel.findOneAndUpdate(
+          { _id: uid },
+          { verification: { code: code, expire: expireDate } },
+        );
+      } else {
+        await this.userModel.findOneAndUpdate(
+          { _id: uid },
+          { verification: { code: code, expire: expireDate } },
+        );
+      }
 
       return res.json({ message: 'email sent successfully!', success: true });
     } catch (err) {

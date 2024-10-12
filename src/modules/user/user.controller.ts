@@ -49,14 +49,14 @@ export class UserController {
     return this.userService.getSingleStudent(query, uid);
   }
 
-  @Roles(Role.PARENT)
+  @Roles(Role.PARENT, Role.STUDENT)
   @UseGuards(RolesGuard)
   @Get('/get-complaints')
   async getComplaints(@Uid() uid: string, @Response() res: Res) {
     return this.userService.getComplaints(uid, res);
   }
 
-  @Roles(Role.PARENT)
+  @Roles(Role.PARENT, Role.STUDENT)
   @UseGuards(RolesGuard)
   @Post('/add-complaint')
   async addComplaints(

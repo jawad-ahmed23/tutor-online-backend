@@ -70,6 +70,9 @@ export class Students {
 
   @Prop({ type: String, default: 'inactive' }) // inactive | active
   status: string;
+
+  @Prop({ type: Boolean, default: false })
+  isSuperUser: boolean;
 }
 
 export const StudentsSchema = SchemaFactory.createForClass(Students);
