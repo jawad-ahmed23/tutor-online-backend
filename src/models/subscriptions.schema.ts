@@ -26,11 +26,11 @@ export class Subscription {
   @Prop({ type: String }) // pending | active | incomplete
   status: string;
 
-  @Prop({ type: String })
-  paymentIntent?: string;
-
   @Prop({ type: Types.ObjectId, ref: 'Students' })
   student: Types.ObjectId;
+
+  @Prop({ type: String })
+  priceId: string;
 }
 
 export const SubscriptionSchema = SchemaFactory.createForClass(Subscription);

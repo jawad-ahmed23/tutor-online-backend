@@ -77,7 +77,18 @@ export class PaymentService {
 
   async createSetupIntent(uid: string) {
     try {
-      const user = await this.UserModel.findById(uid);
+      let user = await this.UserModel.findById(uid);
+
+      if (!user) {
+        user = await this.StudentModel.findById(uid);
+      }
+
+      if (!user) {
+        throw new NotFoundException({
+          success: false,
+          message: 'User Not Found!',
+        });
+      }
 
       if (!user) {
         throw new NotFoundException({
@@ -115,7 +126,18 @@ export class PaymentService {
   ) {
     const { card, billing_details } = body;
     try {
-      const user = await this.UserModel.findById(uid);
+      let user = await this.UserModel.findById(uid);
+
+      if (!user) {
+        user = await this.StudentModel.findById(uid);
+      }
+
+      if (!user) {
+        throw new NotFoundException({
+          success: false,
+          message: 'User Not Found!',
+        });
+      }
 
       const { id } = await this.stripe.paymentMethods.create({
         type: 'card',
@@ -139,7 +161,18 @@ export class PaymentService {
 
   async setDefaultPaymentMethod(body: { pId: string }, uid: string) {
     try {
-      const user = await this.UserModel.findById(uid);
+      let user = await this.UserModel.findById(uid);
+
+      if (!user) {
+        user = await this.StudentModel.findById(uid);
+      }
+
+      if (!user) {
+        throw new NotFoundException({
+          success: false,
+          message: 'User Not Found!',
+        });
+      }
 
       const { pId } = body;
 
@@ -168,7 +201,18 @@ export class PaymentService {
 
   async removePaymentMethod(body: { pId: string }, uid: string) {
     try {
-      const user = await this.UserModel.findById(uid);
+      let user = await this.UserModel.findById(uid);
+
+      if (!user) {
+        user = await this.StudentModel.findById(uid);
+      }
+
+      if (!user) {
+        throw new NotFoundException({
+          success: false,
+          message: 'User Not Found!',
+        });
+      }
 
       const { pId } = body;
 
@@ -193,7 +237,18 @@ export class PaymentService {
 
   async startSubscription(body: { sId: string }, uid: string) {
     try {
-      const user = await this.UserModel.findById(uid);
+      let user = await this.UserModel.findById(uid);
+
+      if (!user) {
+        user = await this.StudentModel.findById(uid);
+      }
+
+      if (!user) {
+        throw new NotFoundException({
+          success: false,
+          message: 'User Not Found!',
+        });
+      }
 
       const { sId } = body;
 
@@ -204,23 +259,84 @@ export class PaymentService {
         });
       }
 
-      const subscription = await this.SubscriptionModel.find({
+      const subscriptionObj = await this.SubscriptionModel.findOne({
         userId: uid,
-        subscriptionId: sId,
+        _id: sId,
       });
 
-      if (!subscription) {
+      if (!subscriptionObj) {
         throw new NotFoundException({
           success: false,
           message: 'Subscription Not Found!',
         });
       }
-    } catch (error) {}
+
+      const options = {
+        customer: user.customerId,
+        items: [{ price: subscriptionObj.priceId }],
+        metadata: {
+          uid: uid,
+          studentId: subscriptionObj.student.toString(),
+        },
+      };
+
+      const subscription = await this.stripe.subscriptions.create(options);
+
+      // store subscriptions info in mongodb
+      await this.SubscriptionModel.findByIdAndUpdate(sId, {
+        startDate: new Date(),
+        status: 'pending',
+        subscriptionId: subscription.id,
+        userId: uid,
+      });
+
+      const price = await this.stripe.prices.retrieve(subscriptionObj.priceId);
+
+      await this.InvoiceModel.create({
+        amount: price.unit_amount / 100,
+        currency: price.currency,
+        invoiceId: subscription.latest_invoice,
+        status: 'unpaid',
+        userId: uid,
+      });
+
+      return {
+        success: true,
+        message: 'Subscriptions created successfully!',
+      };
+    } catch (error) {
+      console.log(error);
+
+      switch (error.code) {
+        case 'resource_missing':
+          throw new BadRequestException({
+            message: 'Please add a method first.',
+            success: false,
+          });
+
+        default:
+          throw new BadRequestException({
+            message: error.message,
+            success: false,
+          });
+      }
+    }
   }
 
   async getUserCards(uid: string) {
     try {
-      const user = await this.UserModel.findById(uid);
+      let user = await this.UserModel.findById(uid);
+
+      if (!user) {
+        user = await this.StudentModel.findById(uid);
+      }
+
+      if (!user) {
+        throw new NotFoundException({
+          success: false,
+          message: 'User Not Found!',
+        });
+      }
 
       if (!user) {
         throw new NotFoundException({
@@ -261,7 +377,7 @@ export class PaymentService {
 
       return {
         success: true,
-        cards: uniqueCards,
+        cards: uniqueCards || [],
       };
     } catch (error) {
       console.log(error);
@@ -276,12 +392,16 @@ export class PaymentService {
     const { setupIntentId } = body;
 
     try {
-      const user = await this.UserModel.findById(uid);
+      let user = await this.UserModel.findById(uid);
+
+      if (!user) {
+        user = await this.StudentModel.findById(uid);
+      }
 
       if (!user) {
         throw new NotFoundException({
           success: false,
-          message: 'User not Found!',
+          message: 'User Not Found!',
         });
       }
 
@@ -308,7 +428,18 @@ export class PaymentService {
   async createSubscription(body: CreateSubscriptionDto, uid: string) {
     const { prices, setupIntentId } = body;
 
-    const user = await this.UserModel.findById(uid);
+    let user = await this.UserModel.findById(uid);
+
+    if (!user) {
+      user = await this.StudentModel.findById(uid);
+    }
+
+    if (!user) {
+      throw new NotFoundException({
+        success: false,
+        message: 'User Not Found!',
+      });
+    }
 
     try {
       if (setupIntentId) {
@@ -333,7 +464,6 @@ export class PaymentService {
         const options = {
           customer: user.customerId,
           items: [{ price: price.priceId }],
-          // TODO: store student ID in subscription
           metadata: {
             uid: uid,
             studentId: price.studentId,
@@ -379,7 +509,11 @@ export class PaymentService {
     prices: { priceId: string; studentId: string }[],
   ) {
     try {
-      const user = await this.UserModel.findById(uid);
+      let user = await this.UserModel.findById(uid);
+
+      if (!user) {
+        user = await this.StudentModel.findById(uid);
+      }
 
       if (!user) {
         throw new NotFoundException({
@@ -395,40 +529,38 @@ export class PaymentService {
           _price.product.toString(),
         );
 
-        const subscription = await this.stripe.subscriptions.create({
-          customer: user.customerId,
-          items: [{ price: price.priceId }],
-          metadata: {
-            uid: uid,
-            studentId: price.studentId,
-          },
-          payment_behavior: 'default_incomplete',
-          expand: ['latest_invoice.payment_intent'],
-        });
+        // const subscription = await this.stripe.subscriptions.create({
+        //   customer: user.customerId,
+        //   items: [{ price: price.priceId }],
+        //   metadata: {
+        //     uid: uid,
+        //     studentId: price.studentId,
+        //   },
+        //   payment_behavior: 'default_incomplete',
+        //   expand: ['latest_invoice.payment_intent'],
+        // });
 
         // store subscriptions info in mongodb
         await this.SubscriptionModel.create({
           startDate: new Date(),
-          status: subscription.status,
-          subscriptionId: subscription.id,
+          status: 'incomplete',
+          subscriptionId: null,
           userId: uid,
           name: product.name,
           amount: _price.unit_amount / 100,
           currency: _price.currency,
-          paymentIntent:
-            // @ts-ignore
-            subscription.latest_invoice.payment_intent.client_secret,
+          priceId: price.priceId,
           student: price.studentId,
         });
 
-        await this.InvoiceModel.create({
-          amount: _price.unit_amount / 100,
-          currency: _price.currency,
-          // @ts-ignore
-          invoiceId: subscription.latest_invoice.id,
-          status: 'unpaid',
-          userId: uid,
-        });
+        // await this.InvoiceModel.create({
+        //   amount: _price.unit_amount / 100,
+        //   currency: _price.currency,
+        //   // @ts-ignore
+        //   invoiceId: subscription.latest_invoice.id,
+        //   status: 'unpaid',
+        //   userId: uid,
+        // });
       }
 
       return {
@@ -446,7 +578,18 @@ export class PaymentService {
 
   async getUserSubscriptions(uid: string) {
     try {
-      const user = await this.UserModel.findById(uid);
+      let user = await this.UserModel.findById(uid);
+
+      if (!user) {
+        user = await this.StudentModel.findById(uid);
+      }
+
+      if (!user) {
+        throw new NotFoundException({
+          success: false,
+          message: 'User Not Found!',
+        });
+      }
 
       if (!user) {
         throw new NotFoundException({
@@ -468,12 +611,16 @@ export class PaymentService {
 
   async getUserInvoices(uid: string) {
     try {
-      const user = await this.UserModel.findById(uid);
+      let user = await this.UserModel.findById(uid);
+
+      if (!user) {
+        user = await this.StudentModel.findById(uid);
+      }
 
       if (!user) {
         throw new NotFoundException({
           success: false,
-          message: 'user not found!',
+          message: 'User Not Found!',
         });
       }
 

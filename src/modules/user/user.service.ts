@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import {
   Injectable,
   BadRequestException,
@@ -90,7 +91,7 @@ export class UserService {
 
         _students.push({
           ...student,
-          id: _student._id,
+          _id: _student._id,
           username,
           password: hashedPassword,
           tempPassword: password,
@@ -239,9 +240,9 @@ export class UserService {
 
   async onBoardSingleStudent(uid: string, body: StudentDto, res: Res) {
     try {
-      const isStudentExists = await this.studentsModel.findById(uid);
+      const student = await this.studentsModel.findById(uid);
 
-      if (!isStudentExists) {
+      if (!student) {
         throw new NotFoundException('Student not found!');
       }
 
@@ -252,6 +253,7 @@ export class UserService {
         subjects: body.subjects,
         daysPerWeek: body.daysPerWeek,
         freeSessions: body.freeSessions,
+        groupYear: body.yearGroup,
       });
 
       await Promise.all(
@@ -280,9 +282,38 @@ export class UserService {
         }),
       );
 
+      let client_secret = null;
+
+      const prices = [
+        { priceId: body.priceId, studentId: student._id.toString() },
+      ];
+
+      if (body.proceedToPayment) {
+        const res = await this.paymentService.createSetupIntent(
+          student._id.toString(),
+        );
+
+        client_secret = res.client_secret;
+      } else {
+        // create inactive subscription
+        this.paymentService.createIncompleteSubscription(
+          student._id.toString(),
+          prices,
+        );
+      }
+
+      const __student = await this.studentsModel
+        .findById(student._id)
+        .populate('freeSessions');
+
+      console.log(__student);
+
       res.status(200).json({
         success: true,
         message: 'Updated Successfully!',
+        client_secret: client_secret,
+        // @ts-ignore
+        student: { ...__student._doc, priceId: body.priceId },
       });
     } catch (err) {
       console.log(err);
