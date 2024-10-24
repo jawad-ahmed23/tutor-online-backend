@@ -403,16 +403,6 @@ export class UserService {
         });
       }
 
-      // Important Note: we should do this after the payment is complete
-      // this.studentsModel.findByIdAndUpdate(studentId, {
-      //   $push: {
-      //     yearGroups: {
-      //       yearGroup: yearGroup,
-      //       subjects,
-      //     },
-      //   },
-      // });
-
       await this.paymentService.createSubscription(
         {
           isAppendToStudent: true,
