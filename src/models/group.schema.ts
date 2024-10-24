@@ -7,7 +7,7 @@ export class Group extends Document {
   members: Types.ObjectId[];
 
   @Prop({ required: true })
-  groupYear: string;
+  yearGroup: string;
 
   @Prop({ required: true })
   subject: string;
