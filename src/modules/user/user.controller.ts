@@ -97,11 +97,11 @@ export class UserController {
     return this.userService.getSessionSwapRequest(uid);
   }
 
-  @Roles(Role.STUDENT)
+  @Roles(Role.PARENT, Role.STUDENT)
   @UseGuards(RolesGuard)
   @Post('/update-profile')
-  async updateProfile(@Uid() uid: string, @Body() body: UpdateProfileDto) {
-    return this.userService.updateProfile(uid, body);
+  async updateProfile(@Body() body: UpdateProfileDto, @Uid() uid: string) {
+    return this.userService.updateProfile(body, uid);
   }
 
   @Roles(Role.STUDENT)

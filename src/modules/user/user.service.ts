@@ -370,12 +370,22 @@ export class UserService {
     }
   }
 
-  async updateProfile(uid: string, body: UpdateProfileDto) {
+  async updateProfile(body: UpdateProfileDto, uid: string) {
     try {
-      await this.studentsModel.findOneAndUpdate(
-        { _id: uid },
-        { enableNotification: body.enableNotification },
-      );
+      let user = await this.userModel.findById(uid);
+
+      if (!user) {
+        user = await this.studentsModel.findById(uid);
+      }
+
+      if (!user) {
+        throw new NotFoundException({
+          success: false,
+          message: 'User Not Found!',
+        });
+      }
+
+      await user.updateOne({ ...body });
 
       return {
         success: true,

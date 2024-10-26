@@ -39,8 +39,8 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop()
-  phoneNumber: number;
+  @Prop({ type: String })
+  phoneNumber: string;
 
   @Prop({
     type: {
@@ -58,6 +58,9 @@ export class User {
 
   @Prop({ type: [Types.ObjectId], default: [], ref: 'Group' })
   groupId: Types.ObjectId[];
+
+  @Prop({ type: Boolean, default: false })
+  enableNotifications: boolean;
 }
 
 // @Schema({ timestamps: true })

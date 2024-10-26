@@ -85,7 +85,9 @@ export class SessionSwapDto {
 }
 
 export class UpdateProfileDto {
-  enableNotification: boolean;
+  name: string;
+  phoneNumber: string;
+  enableNotifications: boolean;
 }
 
 export class AppendYearGroupSubjectsDto {

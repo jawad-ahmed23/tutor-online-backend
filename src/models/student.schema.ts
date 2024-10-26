@@ -20,6 +20,9 @@ export class Students {
   @Prop({ type: String, required: true })
   password: string;
 
+  @Prop({ type: String })
+  phoneNumber: string;
+
   @Prop()
   tempPassword: string;
 
@@ -78,7 +81,7 @@ export class Students {
   isSuperUser: boolean;
 
   @Prop({ type: Boolean, default: false })
-  enableNotification: boolean;
+  enableNotifications: boolean;
 }
 
 export const StudentsSchema = SchemaFactory.createForClass(Students);

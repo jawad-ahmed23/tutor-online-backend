@@ -22,6 +22,7 @@ import {
   ForgotPasswordDto,
   ResetPasswordDto,
   ResetStudentPasswordDto,
+  ChangePasswordDto,
 } from './dto/index.dto';
 import { addHours } from '../../utils';
 import Stripe from 'stripe';
@@ -261,52 +262,6 @@ export class AuthService {
     }
   }
 
-  async _sendMail(from: string, to: string, subject: string, message: string) {
-    await this.mailService.sendMail({
-      from,
-      to,
-      subject,
-      text: message,
-    });
-  }
-
-  async _generateUniqueVerificationCode() {
-    // let code;
-    // let isUnique = false;
-
-    // while (!isUnique) {
-
-    // const existingCode = await this.userModel.findOne({
-    //   verificationCode: code,
-    // });
-    // if (!existingCode) {
-    //   isUnique = true;
-    // }
-    // }
-
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-
-    return code;
-  }
-
-  async _generateUniqueUsername(name: string) {
-    let username: string;
-    let isUnique = false;
-
-    while (!isUnique) {
-      const code = Math.floor(1000 + Math.random() * 900000).toString();
-      username = `${name.toLowerCase().replace(' ', '_')}_${code}`;
-      const existingCode = await this.studentsModel.findOne({
-        username: username,
-      });
-      if (!existingCode) {
-        isUnique = true;
-      }
-    }
-
-    return username;
-  }
-
   async forgotPassword({ email }: ForgotPasswordDto, res: Res) {
     try {
       let user;
@@ -478,5 +433,93 @@ export class AuthService {
         message: error.message,
       });
     }
+  }
+
+  async changePassword(body: ChangePasswordDto, uid: string) {
+    const { currentPassword, newPassword } = body;
+    try {
+      const user = await this.userModel.findById(uid);
+
+      if (!user) {
+        throw new NotFoundException({
+          success: false,
+          message: 'User not found!',
+        });
+      }
+
+      const checkPassword = await bcrypt.compare(
+        currentPassword,
+        user.password,
+      );
+
+      if (!checkPassword) {
+        throw new UnauthorizedException({
+          success: false,
+          message: 'Password is incorrect!',
+        });
+      }
+
+      const newPasswordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+      await this.userModel.findByIdAndUpdate(uid, {
+        password: newPasswordHash,
+      });
+
+      return {
+        success: true,
+        message: 'Password change successfully!',
+      };
+    } catch (error) {
+      throw new BadRequestException({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  async _sendMail(from: string, to: string, subject: string, message: string) {
+    await this.mailService.sendMail({
+      from,
+      to,
+      subject,
+      text: message,
+    });
+  }
+
+  async _generateUniqueVerificationCode() {
+    // let code;
+    // let isUnique = false;
+
+    // while (!isUnique) {
+
+    // const existingCode = await this.userModel.findOne({
+    //   verificationCode: code,
+    // });
+    // if (!existingCode) {
+    //   isUnique = true;
+    // }
+    // }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    return code;
+  }
+
+  async _generateUniqueUsername(name: string) {
+    let username: string;
+    let isUnique = false;
+
+    while (!isUnique) {
+      const code = Math.floor(1000 + Math.random() * 900000).toString();
+      username = `${name.toLowerCase().replace(' ', '_')}_${code}`;
+      const existingCode = await this.studentsModel.findOne({
+        username: username,
+      });
+      if (!existingCode) {
+        isUnique = true;
+      }
+    }
+
+    return username;
   }
 }

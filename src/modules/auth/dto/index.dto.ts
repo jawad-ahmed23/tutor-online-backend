@@ -58,3 +58,11 @@ export class ResetStudentPasswordDto {
   @ApiProperty()
   newPassword: string;
 }
+
+export class ChangePasswordDto {
+  @ApiProperty()
+  currentPassword: string;
+
+  @ApiProperty()
+  newPassword: string;
+}
