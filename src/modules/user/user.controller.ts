@@ -15,6 +15,8 @@ import {
   AddComplaintDto,
   StudentDto,
   SessionSwapDto,
+  UpdateProfileDto,
+  AppendYearGroupSubjectsDto,
 } from './dto/index.dto';
 
 import { RolesGuard } from '../../guard/roles.guard';
@@ -93,5 +95,22 @@ export class UserController {
   @Get('/session-swaps')
   async getSessionSwapRequest(@Uid() uid: string) {
     return this.userService.getSessionSwapRequest(uid);
+  }
+
+  @Roles(Role.PARENT, Role.STUDENT)
+  @UseGuards(RolesGuard)
+  @Post('/update-profile')
+  async updateProfile(@Body() body: UpdateProfileDto, @Uid() uid: string) {
+    return this.userService.updateProfile(body, uid);
+  }
+
+  @Roles(Role.STUDENT)
+  @UseGuards(RolesGuard)
+  @Post('/student/append-yeargroups-subjects')
+  async appendYearGroupsSubjects(
+    @Body() body: AppendYearGroupSubjectsDto,
+    @Uid() uid: string,
+  ) {
+    return this.userService.appendYearGroupsSubjects(body, uid);
   }
 }
